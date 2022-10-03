@@ -1,3 +1,11 @@
+/////////////////////////////////////////////////
+// 	DH KHTN - DHQG TPHCM						/
+// 	20120307		Phạm Gia Khiêm				/
+// 	20120519		Nguyễn Thị Thúy Liễu		/
+// 	20120540		Võ Hoàng Thảo Nguyên		/
+/////////////////////////////////////////////////
+
+
 // exception.cc 
 //	Entry point into the Nachos kernel from user programs.
 //	There are two kinds of things that can cause control to
@@ -120,6 +128,11 @@ void ExceptionHandler(ExceptionType which)
     case SyscallException:
 		switch(type) {
 		case SC_Halt:
+			/*
+				Input	: NULL
+				Output	: Notify for shut down
+				Used	: Shut down Operating System
+			*/
 			DEBUG(dbgSys, "Shutdown, initiated by user program.\n");
 			printf ("\n\n Shutdown, initiated by user program.");
 			SysHalt();
@@ -127,6 +140,11 @@ void ExceptionHandler(ExceptionType which)
 			break;
 
 		case SC_Add:
+			/*
+				Input	: r4, r5
+				Output	: NULL
+				Used	: Tính tổng giá trị của r4 và r5
+			*/
 			DEBUG(dbgSys, "Add " << kernel->machine->ReadRegister(4) << " + " << kernel->machine->ReadRegister(5) << "\n");
 	
 			/* Process SysAdd Systemcall*/
@@ -155,25 +173,30 @@ void ExceptionHandler(ExceptionType which)
 			break;
 
 	  	case SC_Create:
+			/*
+				Input	: Register 4 (chứa vùng nhớ của tên file)
+				Output	: Thông báo kết quả tạo file (Lỗi = -1 | Thành công = 0)
+				Used	: Tạo file với tên là filename
+			*/
 			int virtAddr;
 			char* filename;
 
-			DEBUG('a', "\n SC_Create call ...");
-			DEBUG('a', "\n Reading virtual address of filename");
+			DEBUG(dbgSys, "\n SC_Create call ...");
+			DEBUG(dbgSys, "\n Reading virtual address of filename");
 			// Lấy tham số trên tập tin từ thanh ghi r4
 			virtAddr = kernel->machine->ReadRegister(4);
-			DEBUG('a', "\n Reading filename.");
+			DEBUG(dbgSys, "\n Reading filename.");
 			// MaxFileLenght là 32
 			filename = User2System(virtAddr, MaxFileLength + 1);
 			if (filename == NULL)
 			{
 				printf("\n Not enough memory in system");
-				DEBUG('a', "\n Not enough memory in system");
+				DEBUG(dbgSys, "\n Not enough memory in system");
 				kernel->machine->WriteRegister(2, -1); // Trả lỗi về cho chương trình người dùng
 				delete filename;
 				return;
 			}
-			DEBUG('a', "\n Finish reading filename.");
+			DEBUG(dbgSys, "\n Finish reading filename.");
 			//DEBUG(‘a’,"\n File name : '"<<filename<<"'");
 			// Create file with size = 0
 
@@ -196,6 +219,11 @@ void ExceptionHandler(ExceptionType which)
 			break;
 
 		case SC_Sub:
+			/*
+				Input	: r4 r5
+				Output	: NULL
+				Used	: Tính hiệu của giá trị r4 - r5
+			*/
 			int result;
 
 			result = SysSub(kernel->machine->ReadRegister(4)    // int op1
@@ -205,8 +233,43 @@ void ExceptionHandler(ExceptionType which)
 			ASSERTNOTREACHED()
 
 		case SC_ReadChar:
+			/*
+				Input	: NULL
+				Output	: 1 ký tự (char)
+				Used	: Đọc một ký tự từ người dùng nhập vào
+			*/
+			// Số lượng kí tự nhập vào 
+			int c_char = kernel->synchConRead();
+
+			if (c_char > 1)
+			{
+				printf("ERROR: So luong ky tu nhap vao phai la 1.\n");
+				DEBUG(dbgSys, "ERROR: So luong ky tu nhap vao phai la 1.\n");
+				kernel->machine->WriteRegister(2, 0);
+			}
+			if (c_char == 0)
+			{
+				printf("ERROR: Ky tu rong !!.\n");
+				DEBUG(dbgSys, "ERROR: Ky tu rong !!.\n");
+				kernel->machine->WriteRegister(2, 0);
+			}
+			if (c_char > 1)
+			{
+				// Chuỗi vừa lấy chỉ có 1 ký tự -> index = 0
+				char _char = kernel->synchConGetChar();
+				kernel->machine->WriteRegister(2, _char);
+			}
+			
+			// Tăng PC
 			break;
 		case SC_PrintChar:
+			/*
+				Input	: Ký tự (char)
+				Output	: Ký tự (char)
+				Used	: Xuất 1 ký tự là tham số argv ra màn hình
+			*/
+			char _char = (char)kernel->machine->ReadRegister(4);
+			kernel->synchConPutChar(_char);
 			break;
       	default:
 			cerr << "Unexpected system call " << type << "\n";

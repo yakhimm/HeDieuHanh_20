@@ -184,6 +184,20 @@ Kernel::ConsoleTest() {
 
 }
 
+int Kernel::synchConRead() {
+    char ch;
+    int ans = 0;
+    // Đếm số lượng ký tự được đọc vào
+    do {
+        ch = synchConsoleIn->GetChar();
+        if (ch == EOF)
+            return 0;
+        else
+            ans++;
+    } while (ch != EOF);
+    return ans;
+}
+
 //----------------------------------------------------------------------
 // Kernel::NetworkTest
 //      Test whether the post office is working. On machines #0 and #1, do:

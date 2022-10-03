@@ -41,6 +41,10 @@ class Kernel {
 
     void NetworkTest();         // interactive 2-machine network test
     
+    int synchConRead();                 // Đọc chuỗi nhập vào
+
+    char synchConGetChar() {synchConsoleIn->GetChar();};
+    void synchConPutChar(char ch) {synchConsoleOut->PutChar(ch);}; 
 // These are public for notational convenience; really, 
 // they're global variables used everywhere.
 

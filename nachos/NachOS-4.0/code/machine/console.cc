@@ -28,7 +28,7 @@
 ConsoleInput::ConsoleInput(char *readFile, CallBackObj *toCall)
 {
     if (readFile == NULL)
-	readFileNo = 0;					// keyboard = stdin
+	    readFileNo = 0;					// keyboard = stdin
     else
     	readFileNo = OpenForReadWrite(readFile, TRUE);	// should be read-only
 
@@ -48,7 +48,7 @@ ConsoleInput::ConsoleInput(char *readFile, CallBackObj *toCall)
 ConsoleInput::~ConsoleInput()
 {
     if (readFileNo != 0)
-	Close(readFileNo);
+	    Close(readFileNo);
 }
 
 
@@ -98,8 +98,7 @@ ConsoleInput::CallBack()
 //	Either return the character, or EOF if none buffered.
 //----------------------------------------------------------------------
 
-char
-ConsoleInput::GetChar()
+char ConsoleInput::GetChar()
 {
    char ch = incoming;
 
