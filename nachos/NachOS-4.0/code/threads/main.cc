@@ -56,8 +56,7 @@ Debug *debug;
 //	Delete kernel data structures; called when user hits "ctl-C".
 //----------------------------------------------------------------------
 
-static void 
-Cleanup(int x) 
+static void Cleanup(int x) 
 {     
     cerr << "\nCleaning up after signal " << x << "\n";
     delete kernel; 
@@ -77,8 +76,7 @@ static const int TransferSize = 128;
 //      Copy the contents of the UNIX file "from" to the Nachos file "to"
 //----------------------------------------------------------------------
 
-static void
-Copy(char *from, char *to)
+static void Copy(char *from, char *to)
 {
     int fd;
     OpenFile* openFile;
@@ -299,4 +297,3 @@ int main(int argc, char **argv)
     
     ASSERTNOTREACHED();
 }
-

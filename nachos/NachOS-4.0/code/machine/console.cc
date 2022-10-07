@@ -61,8 +61,7 @@ ConsoleInput::~ConsoleInput()
 //	Then invoke the "callBack" registered by whoever wants the character.
 //----------------------------------------------------------------------
 
-void
-ConsoleInput::CallBack()
+void ConsoleInput::CallBack()
 {
   char c;
   int readCount;
@@ -108,8 +107,6 @@ char ConsoleInput::GetChar()
    incoming = EOF;
    return ch;
 }
-
-
 
 //----------------------------------------------------------------------
 // ConsoleOutput::ConsoleOutput

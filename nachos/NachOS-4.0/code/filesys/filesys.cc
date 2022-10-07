@@ -171,8 +171,7 @@ FileSystem::FileSystem(bool format)
 //	"initialSize" -- size of file to be created
 //----------------------------------------------------------------------
 
-bool
-FileSystem::Create(char *name, int initialSize)
+bool FileSystem::Create(char *name, int initialSize)
 {
     Directory *directory;
     PersistentBitmap *freeMap;
@@ -223,8 +222,7 @@ FileSystem::Create(char *name, int initialSize)
 //	"name" -- the text name of the file to be opened
 //----------------------------------------------------------------------
 
-OpenFile *
-FileSystem::Open(char *name)
+OpenFile *FileSystem::Open(char *name)
 { 
     Directory *directory = new Directory(NumDirEntries);
     OpenFile *openFile = NULL;
@@ -253,8 +251,7 @@ FileSystem::Open(char *name)
 //	"name" -- the text name of the file to be removed
 //----------------------------------------------------------------------
 
-bool
-FileSystem::Remove(char *name)
+bool FileSystem::Remove(char *name)
 { 
     Directory *directory;
     PersistentBitmap *freeMap;
@@ -290,8 +287,7 @@ FileSystem::Remove(char *name)
 // 	List all the files in the file system directory.
 //----------------------------------------------------------------------
 
-void
-FileSystem::List()
+void FileSystem::List()
 {
     Directory *directory = new Directory(NumDirEntries);
 
@@ -310,8 +306,7 @@ FileSystem::List()
 //	      the data in the file
 //----------------------------------------------------------------------
 
-void
-FileSystem::Print()
+void FileSystem::Print()
 {
     FileHeader *bitHdr = new FileHeader;
     FileHeader *dirHdr = new FileHeader;

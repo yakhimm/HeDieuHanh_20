@@ -84,8 +84,7 @@ Kernel::Kernel(int argc, char **argv)
 //	data via the "kernel" global variable.
 //----------------------------------------------------------------------
 
-void
-Kernel::Initialize()
+void Kernel::Initialize()
 {
     // We didn't explicitly allocate the current thread we are running in.
     // But if it ever tries to give up the CPU, we better have a Thread
@@ -139,8 +138,7 @@ Kernel::~Kernel()
 //      Test threads, semaphores, synchlists
 //----------------------------------------------------------------------
 
-void
-Kernel::ThreadSelfTest() {
+void Kernel::ThreadSelfTest() {
    Semaphore *semaphore;
    SynchList<int> *synchList;
    
@@ -166,8 +164,7 @@ Kernel::ThreadSelfTest() {
 //      Test the synchconsole
 //----------------------------------------------------------------------
 
-void
-Kernel::ConsoleTest() {
+void Kernel::ConsoleTest() {
     char ch;
 
     cout << "Testing the console device.\n" 
@@ -184,18 +181,13 @@ Kernel::ConsoleTest() {
 
 }
 
-int Kernel::synchConRead() {
-    char ch;
-    int ans = 0;
-    // Đếm số lượng ký tự được đọc vào
-    do {
-        ch = synchConsoleIn->GetChar();
-        if (ch == EOF)
-            return 0;
-        else
-            ans++;
-    } while (ch != EOF);
-    return ans;
+// Đọc ký tự char trả về số lượng ký tự đọc vào
+int Kernel::synchConsole_Read(char* buffer, int max_bytes) {
+    return this->synchConsoleIn->Read(buffer, max_bytes);
+}
+
+void Kernel::synchConsole_Write(char* buffer, int max_bytes) {
+    this->synchConsoleOut->Write(buffer, max_bytes);
 }
 
 //----------------------------------------------------------------------
@@ -211,8 +203,7 @@ int Kernel::synchConRead() {
 //  This test works best if each Nachos machine has its own window
 //----------------------------------------------------------------------
 
-void
-Kernel::NetworkTest() {
+void Kernel::NetworkTest() {
 
     if (hostName == 0 || hostName == 1) {
         // if we're machine 1, send to 0 and vice versa

@@ -188,8 +188,7 @@ void ThreadExit(int ExitCode);
 
 // Các lệnh, Thao tác của project
 char ReadChar();
-
-void PrintChar(char _character);
+void PrintChar(char character);
 
 
 

@@ -33,6 +33,7 @@
 #include "main.h"
 #include "syscall.h"
 #include "ksyscall.h"
+
 //----------------------------------------------------------------------
 // ExceptionHandler
 // 	Entry point into the Nachos kernel.  Called when a user program
@@ -55,6 +56,66 @@
 //	"which" is the kind of exception.  The list of possible exceptions 
 //	is in machine.h.
 //----------------------------------------------------------------------
+// Input: - User space address (int)
+// - Limit of buffer (int)
+// Output:- Buffer (char*)
+// Purpose: Copy buffer from User memory space to System memory space
+char* User2System(int virtAddr, int limit)
+{
+  int i; // index
+  int oneChar;
+  char* kernelBuf = NULL;
+  kernelBuf = new char[limit + 1]; // need for terminal string
+
+  if (kernelBuf == NULL)
+    return kernelBuf;
+  memset(kernelBuf, 0, limit + 1);
+  // printf("\n Filename u2s: ");
+  
+  for (i = 0; i < limit; i++)
+  {
+    kernel->machine->ReadMem(virtAddr + i, 1, &oneChar);
+    kernelBuf[i] = (char)oneChar;
+    // printf("%c", kernelBuf[i])
+    if (oneChar == 0)
+      break;
+  }
+  return kernelBuf;
+}
+
+// Input: - User space address (int)
+// - Limit of buffer (int)
+// - Buffer (char[])
+// Output:- Number of bytes copied (int)
+// Purpose: Copy buffer from System memory space to User memory space
+int System2User(int virtAddr, int len, char* buffer)
+{
+  if (len < 0) return -1;
+  if (len == 0) return len;
+  
+  int i = 0;
+  int oneChar = 0;
+  do {
+    oneChar = (int)buffer[i];
+    kernel->machine->WriteMem(virtAddr + i, 1, oneChar);
+    i++;
+  } while (i < len && oneChar != 0);
+  return i;
+}
+
+void IncreasePC()
+/* Modify return point */
+{
+	/* set previous programm counter (debugging only)*/
+	kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
+
+	/* set programm counter to next instruction (all Instructions are 4 byte wide)*/
+	kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
+				
+	/* set next programm counter for brach execution */
+	kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg)+4);
+}
+// -------------------------------------------------------------------
 
 #define MaxFileLength 32
 
@@ -68,7 +129,7 @@ void ExceptionHandler(ExceptionType which)
 	// Add from slide [2]
 	case NoException:
 		return;
-
+	
 	case PageFaultException:
 		/* A page fault occurs when a program attempts to access 
 		data or code that is in its address space,
@@ -76,7 +137,7 @@ void ExceptionHandler(ExceptionType which)
 		*/
 		DEBUG(dbgSys, "Invalid page found.\n");
 		printf("\n\n Invalid page found");
-		ASSERTNOTREACHED();
+		SysHalt();
 		break;
 	
 	case ReadOnlyException:
@@ -84,7 +145,7 @@ void ExceptionHandler(ExceptionType which)
 		restricting any writing to the file. */
 		DEBUG(dbgSys, "Restrict any writing to the read-only page.\n");
 		printf("\n\n Restrict any writing to the read-only page.");
-		ASSERTNOTREACHED();
+		SysHalt();
 		break;
 
 	case BusErrorException:
@@ -94,7 +155,7 @@ void ExceptionHandler(ExceptionType which)
 		*/
 		DEBUG(dbgSys, "Translation resulted invalid physical address.\n");
 		printf("\n\n Translation resulted invalid physical address");
-		ASSERTNOTREACHED();
+		SysHalt();
 		break;
 
 	case AddressErrorException:
@@ -103,26 +164,26 @@ void ExceptionHandler(ExceptionType which)
 		*/
 		DEBUG(dbgSys, "Unaligned reference or one that was beyond the end of the address space.\n");
 		printf("\n\n Unaligned reference or one that was beyond the end of the address space");
-		ASSERTNOTREACHED();
+		SysHalt();
 		break;
-
+	
 	case OverflowException:
 		DEBUG(dbgSys, "Overflow in add or sub type.\n");
 		printf("\n\n Overflow in add or sub type.");
-		ASSERTNOTREACHED();
+		SysHalt();
 		break;
 
 	case IllegalInstrException:
 		// They arise because not every possible memory value corresponds to a valid instruction.
 		DEBUG(dbgSys, "Unimplemented or reserved instruction.\n");
 		printf("\n\n Unimplemented or reserved instruction.");
-		ASSERTNOTREACHED();
+		SysHalt();
 		break;
 
 	case NumExceptionTypes:
 		DEBUG(dbgSys, "Number exception types.\n");
 		printf("\n\n Number exception types");
-		ASSERTNOTREACHED();
+		SysHalt();
 		break;
 
     case SyscallException:
@@ -135,6 +196,8 @@ void ExceptionHandler(ExceptionType which)
 			*/
 			DEBUG(dbgSys, "Shutdown, initiated by user program.\n");
 			printf ("\n\n Shutdown, initiated by user program.");
+			
+			//ASSERTNOTREACHED();
 			SysHalt();
 			ASSERTNOTREACHED();
 			break;
@@ -155,21 +218,23 @@ void ExceptionHandler(ExceptionType which)
 			DEBUG(dbgSys, "Add returning with " << result << "\n");
 			/* Prepare Result */
 			kernel->machine->WriteRegister(2, (int)result);
-	
-			// Hàm tăng giá trị PC --------------------------------------------------------------
-			/* Modify return point */
-			{
-				/* set previous programm counter (debugging only)*/
-				kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
+			
+			break;
 
-				/* set programm counter to next instruction (all Instructions are 4 byte wide)*/
-				kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
-				
-				/* set next programm counter for brach execution */
-				kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg)+4);
-			}
-			return;		
-			ASSERTNOTREACHED();
+		case SC_Sub:
+			/*
+				Input	: r4 r5
+				Output	: NULL
+				Used	: Tính hiệu của giá trị r4 - r5
+			*/
+			DEBUG(dbgSys, "Sub " << kernel->machine->ReadRegister(4) << " - " << kernel->machine->ReadRegister(5) << "\n");
+			int sub;
+
+			sub = SysSub(kernel->machine->ReadRegister(4)    // int op1
+							, kernel->machine->ReadRegister(5));// int op2 
+			
+			kernel->machine->WriteRegister(2, (int)sub);
+
 			break;
 
 	  	case SC_Create:
@@ -206,7 +271,7 @@ void ExceptionHandler(ExceptionType which)
 			// đĩa cứng cấp phát cho file, việc quản ly các block của file
 			// trên ổ đĩa là một đồ án khác
 
-			if (!kernel->fileSystem->Create(filename, 0))
+			if (!kernel->fileSystem->Create(filename))
 			{
 				printf("\n Error create file '%s'",filename);
 				kernel->machine->WriteRegister(2, -1);
@@ -215,71 +280,72 @@ void ExceptionHandler(ExceptionType which)
 			}
 
 			kernel->machine->WriteRegister(2, 0); // Trả về cho chương trình người dùng thành công !!
+		
 			delete filename;
 			break;
-
-		case SC_Sub:
-			/*
-				Input	: r4 r5
-				Output	: NULL
-				Used	: Tính hiệu của giá trị r4 - r5
-			*/
-			int result;
-
-			result = SysSub(kernel->machine->ReadRegister(4)    // int op1
-							, kernel->machine->ReadRegister(5));// int op2 
-			
-			kernel->machine->WriteRegister(2, (int)result);
-			ASSERTNOTREACHED()
-
+		
 		case SC_ReadChar:
+		{
 			/*
 				Input	: NULL
 				Output	: 1 ký tự (char)
 				Used	: Đọc một ký tự từ người dùng nhập vào
 			*/
 			// Số lượng kí tự nhập vào 
-			int c_char = kernel->synchConRead();
-
+			int max_bytes = 255;
+			char* buffer = new char[255];
+			int c_char = kernel->synchConsole_Read(buffer, max_bytes);
+					
 			if (c_char > 1)
 			{
 				printf("ERROR: So luong ky tu nhap vao phai la 1.\n");
 				DEBUG(dbgSys, "ERROR: So luong ky tu nhap vao phai la 1.\n");
 				kernel->machine->WriteRegister(2, 0);
+				return;
 			}
-			if (c_char == 0)
+			else if (c_char == 0)
 			{
 				printf("ERROR: Ky tu rong !!.\n");
 				DEBUG(dbgSys, "ERROR: Ky tu rong !!.\n");
 				kernel->machine->WriteRegister(2, 0);
+				return;
 			}
-			if (c_char > 1)
+			else
 			{
 				// Chuỗi vừa lấy chỉ có 1 ký tự -> index = 0
-				char _char = kernel->synchConGetChar();
+				char _char = buffer[0];
 				kernel->machine->WriteRegister(2, _char);
 			}
 			
-			// Tăng PC
+			delete buffer;
 			break;
+		}
+			
 		case SC_PrintChar:
+		{
 			/*
 				Input	: Ký tự (char)
 				Output	: Ký tự (char)
 				Used	: Xuất 1 ký tự là tham số argv ra màn hình
 			*/
 			char _char = (char)kernel->machine->ReadRegister(4);
-			kernel->synchConPutChar(_char);
+			kernel->synchConsole_Write(&_char, 1);
+			
 			break;
+		}
+		
       	default:
 			cerr << "Unexpected system call " << type << "\n";
 			break;
       	}
+		
+		IncreasePC();
       	break;
 
 	default:
 		cerr << "Unexpected user mode exception" << (int)which << "\n";
 		break;
     }
+	
     ASSERTNOTREACHED();
 }

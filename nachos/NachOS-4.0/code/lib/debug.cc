@@ -33,8 +33,7 @@ Debug::Debug(char *flagList)
 //      Return TRUE if DEBUG messages with "flag" are to be printed.
 //----------------------------------------------------------------------
 
-bool
-Debug::IsEnabled(char flag)
+bool Debug::IsEnabled(char flag)
 {
     if (enableFlags != NULL) {
 	return ((strchr(enableFlags, flag) != 0) 

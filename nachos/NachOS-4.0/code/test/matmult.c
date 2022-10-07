@@ -17,8 +17,7 @@ int A[Dim][Dim];
 int B[Dim][Dim];
 int C[Dim][Dim];
 
-int
-main()
+int main()
 {
     int i, j, k;
 

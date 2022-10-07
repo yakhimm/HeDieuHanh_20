@@ -54,8 +54,7 @@ PendingInterrupt::PendingInterrupt(CallBackObj *callOnInt,
 //	Compare to interrupts based on which should occur first.
 //----------------------------------------------------------------------
 
-static int
-PendingCompare (PendingInterrupt *x, PendingInterrupt *y)
+static int PendingCompare (PendingInterrupt *x, PendingInterrupt *y)
 {
     if (x->when < y->when) { return -1; }
     else if (x->when > y->when) { return 1; }
@@ -102,8 +101,7 @@ Interrupt::~Interrupt()
 //	"now" -- the new interrupt status
 //----------------------------------------------------------------------
 
-void
-Interrupt::ChangeLevel(IntStatus old, IntStatus now)
+void Interrupt::ChangeLevel(IntStatus old, IntStatus now)
 {
     level = now;
     DEBUG(dbgInt, "\tinterrupts: " << intLevelNames[old] << " -> " << intLevelNames[now]);
@@ -120,8 +118,7 @@ Interrupt::ChangeLevel(IntStatus old, IntStatus now)
 //	"now" -- the new interrupt status
 //----------------------------------------------------------------------
 
-IntStatus
-Interrupt::SetLevel(IntStatus now)
+IntStatus Interrupt::SetLevel(IntStatus now)
 {
     IntStatus old = level;
     
@@ -144,8 +141,7 @@ Interrupt::SetLevel(IntStatus now)
 //		interrupts are re-enabled
 //		a user instruction is executed
 //----------------------------------------------------------------------
-void
-Interrupt::OneTick()
+void Interrupt::OneTick()
 {
     MachineStatus oldStatus = status;
     Statistics *stats = kernel->stats;
@@ -186,8 +182,7 @@ Interrupt::OneTick()
 //	interrupted thread.
 //----------------------------------------------------------------------
 
-void
-Interrupt::YieldOnReturn()
+void Interrupt::YieldOnReturn()
 { 
     ASSERT(inHandler == TRUE);  
     yieldOnReturn = TRUE; 
@@ -204,8 +199,7 @@ Interrupt::YieldOnReturn()
 //	If there are no pending interrupts, stop.  There's nothing
 //	more for us to do.
 //----------------------------------------------------------------------
-void
-Interrupt::Idle()
+void Interrupt::Idle()
 {
     DEBUG(dbgInt, "Machine idling; checking for interrupts.");
     status = IdleMode;
@@ -230,8 +224,7 @@ Interrupt::Idle()
 // Interrupt::Halt
 // 	Shut down Nachos cleanly, printing out performance statistics.
 //----------------------------------------------------------------------
-void
-Interrupt::Halt()
+void Interrupt::Halt()
 {
     cout << "Machine halting!\n\n";
     kernel->stats->Print();
@@ -253,8 +246,7 @@ Interrupt::Halt()
 //		 interrupt is to occur
 //	"type" is the hardware device that generated the interrupt
 //----------------------------------------------------------------------
-void
-Interrupt::Schedule(CallBackObj *toCall, int fromNow, IntType type)
+void Interrupt::Schedule(CallBackObj *toCall, int fromNow, IntType type)
 {
     int when = kernel->stats->totalTicks + fromNow;
     PendingInterrupt *toOccur = new PendingInterrupt(toCall, when, type);
@@ -277,8 +269,7 @@ Interrupt::Schedule(CallBackObj *toCall, int fromNow, IntType type)
 //		so we should simply advance the clock to when the next 
 //		pending interrupt would occur (if any).
 //----------------------------------------------------------------------
-bool
-Interrupt::CheckIfDue(bool advanceClock)
+bool Interrupt::CheckIfDue(bool advanceClock)
 {
     PendingInterrupt *next;
     Statistics *stats = kernel->stats;
@@ -327,8 +318,7 @@ Interrupt::CheckIfDue(bool advanceClock)
 //	When, where, why, etc.
 //----------------------------------------------------------------------
 
-static void
-PrintPending (PendingInterrupt *pending)
+static void PrintPending (PendingInterrupt *pending)
 {
     cout << "Interrupt handler "<< intTypeNames[pending->type];
     cout << ", scheduled at " << pending->when;
@@ -340,8 +330,7 @@ PrintPending (PendingInterrupt *pending)
 //	that are scheduled to occur in the future.
 //----------------------------------------------------------------------
 
-void
-Interrupt::DumpState()
+void Interrupt::DumpState()
 {
     cout << "Time: " << kernel->stats->totalTicks;
     cout << ", interrupts " << intLevelNames[level] << "\n";

@@ -24,8 +24,7 @@ static char* exceptionNames[] = { "no exception", "syscall",
 //	does, for storing the bytes of an integer.  Stop on error.
 //----------------------------------------------------------------------
 
-static
-void CheckEndian()
+static void CheckEndian()
 {
     union checkit {
         char charword[4];
@@ -97,8 +96,7 @@ Machine::~Machine()
 //	"badVaddr" -- the virtual address causing the trap, if appropriate
 //----------------------------------------------------------------------
 
-void
-Machine::RaiseException(ExceptionType which, int badVAddr)
+void Machine::RaiseException(ExceptionType which, int badVAddr)
 {
     DEBUG(dbgMach, "Exception: " << exceptionNames[which]);
     
@@ -172,8 +170,7 @@ void Machine::Debugger()
 //	of memory, but that seemed like overkill.
 //----------------------------------------------------------------------
 
-void
-Machine::DumpState()
+void Machine::DumpState()
 {
     int i;
     
@@ -209,17 +206,14 @@ Machine::DumpState()
 //   	Fetch or write the contents of a user program register.
 //----------------------------------------------------------------------
 
-int 
-Machine::ReadRegister(int num)
+int Machine::ReadRegister(int num)
 {
     ASSERT((num >= 0) && (num < NumTotalRegs));
     return registers[num];
 }
 
-void 
-Machine::WriteRegister(int num, int value)
+void Machine::WriteRegister(int num, int value)
 {
     ASSERT((num >= 0) && (num < NumTotalRegs));
     registers[num] = value;
 }
-
