@@ -9,14 +9,14 @@ int main()
     int j;
     int temp;
     int swapped;
-    swapped=0;
+    swapped = 0;
 
     // Nhập số lượng phần tử
-    PrintString("Nhap so phan tu cua mang:\t");
+    PrintString("Nhap so phan tu cua mang: \t");
     n = ReadNum();
     while (n <= 0 || n > 100)
     {
-        PrintString("Nhap so phan tu cua mang:\t");
+        PrintString("Nhap so phan tu cua mang: \t");
         n = ReadNum();
     }
 
@@ -25,12 +25,12 @@ int main()
     {
         PrintString("a[");
         PrintNum(i);
-        PrintString("] =\t");
+        PrintString("] = \t");
         arr[i] = ReadNum();
     }
 
     // Nhập lựa chọn sắp xếp
-    PrintString("Chon cach sap xep (0: Tang dan, 1: Giam dan):\t");
+    PrintString("Chon cach sap xep (0: Tang dan, 1: Giam dan): \t");
     choose = ReadNum();
 
     // Sắp xếp tăng dần theo BubbleSort

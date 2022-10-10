@@ -189,15 +189,6 @@ void Kernel::ConsoleTest() {
 
 }
 
-// Đọc ký tự char trả về số lượng ký tự đọc vào
-int Kernel::synchConsole_Read(char* buffer, int max_bytes) {
-    return this->synchConsoleIn->Read(buffer, max_bytes);
-}
-
-void Kernel::synchConsole_Write(char* buffer, int max_bytes) {
-    this->synchConsoleOut->Write(buffer, max_bytes);
-}
-
 //----------------------------------------------------------------------
 // Kernel::NetworkTest
 //      Test whether the post office is working. On machines #0 and #1, do:

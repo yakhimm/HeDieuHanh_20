@@ -186,12 +186,10 @@ ThreadJoin:
 	j 	$31
 	.end ThreadJoin
 
-
-
 	.globl ReadChar
 	.ent	ReadChar
 ReadChar:
-	addiu $2,$0,SC_ReadChar
+	addiu $2, $0, SC_ReadChar
 	syscall
 	j	$31
 	.end ReadChar
@@ -199,7 +197,7 @@ ReadChar:
 	.globl PrintChar
 	.ent	PrintChar
 PrintChar:
-	addiu $2,$0,SC_PrintChar
+	addiu $2, $0, SC_PrintChar
 	syscall
 	j	$31
 	.end PrintChar

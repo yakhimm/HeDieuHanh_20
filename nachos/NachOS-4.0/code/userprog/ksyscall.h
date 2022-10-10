@@ -1,3 +1,10 @@
+/////////////////////////////////////////////////
+// 	DH KHTN - DHQG TPHCM						/
+// 	20120307		Phạm Gia Khiêm				/
+// 	20120519		Nguyễn Thị Thúy Liễu		/
+// 	20120540		Võ Hoàng Thảo Nguyên		/
+/////////////////////////////////////////////////
+
 /**************************************************************
  *
  * userprog/ksyscall.h
@@ -281,8 +288,7 @@ void SysReadNum()
         }
         
         // Trả về kết quả (là trị tuyệt đối)
-        num = -num;
-        result = num;
+        result = abs(num);
     }
     else
         result = 0;
