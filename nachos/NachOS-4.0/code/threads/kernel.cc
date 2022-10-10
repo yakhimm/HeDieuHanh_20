@@ -1,3 +1,11 @@
+/////////////////////////////////////////////////
+// 	DH KHTN - DHQG TPHCM						/
+// 	20120307		Phạm Gia Khiêm				/
+// 	20120519		Nguyễn Thị Thúy Liễu		/
+// 	20120540		Võ Hoàng Thảo Nguyên		/
+/////////////////////////////////////////////////
+
+
 // kernel.cc 
 //	Initialization and cleanup routines for the Nachos kernel.
 //

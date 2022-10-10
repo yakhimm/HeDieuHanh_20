@@ -145,8 +145,7 @@ ConsoleOutput::~ConsoleOutput()
 //	display.
 //----------------------------------------------------------------------
 
-void
-ConsoleOutput::CallBack()
+void ConsoleOutput::CallBack()
 {
     putBusy = FALSE;
     kernel->stats->numConsoleCharsWritten++;
@@ -159,8 +158,7 @@ ConsoleOutput::CallBack()
 //	to occur in the future, and return.
 //----------------------------------------------------------------------
 
-void
-ConsoleOutput::PutChar(char ch)
+void ConsoleOutput::PutChar(char ch)
 {
     ASSERT(putBusy == FALSE);
     WriteFile(writeFileNo, &ch, sizeof(char));

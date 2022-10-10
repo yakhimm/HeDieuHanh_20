@@ -53,45 +53,6 @@ char SynchConsoleInput::GetChar()
     return ch;
 }
 
-int SynchConsoleInput::Read(char* buffer, int max_bytes)
-{
-    // Thực hiện vòng lặp
-    int i;
-    // xác định kết thúc line đọc vào hay chưa
-    int EOL = FALSE;
-    char ch;
-
-    // Khởi tạo giá trị cho s_char truyền vào:
-    for (i = 0; i < max_bytes; i++)
-        buffer[i] = 0;
-    // Khởi tạo lại i
-    i = 0;
-
-    lock->Acquire();                                // Khóa lại để đọc 1 dòng
-
-    while ((i < max_bytes) && (EOL == FALSE))
-    {
-        do {
-            waitFor->P();	// wait for EOF or a char to be available.
-            ch = consoleInput->GetChar();
-        } while (ch == EOF);
-        if ((ch == '\012') || (ch == '\001'))
-            EOL = TRUE;
-        else
-        {
-            buffer[i] = ch;
-            i++;
-        }
-    }
-
-    lock->Release();                                // Mở khóa
-
-    if (ch == '\001')
-        return -1;
-    else    
-        return i;            // Số lượng ký tự nhập vào 
-}
-
 //----------------------------------------------------------------------
 // SynchConsoleInput::CallBack
 //      Interrupt handler called when keystroke is hit; wake up
@@ -145,21 +106,6 @@ void SynchConsoleOutput::PutChar(char ch)
     lock->Release();
 }
 
-void SynchConsoleOutput::Write(char* buffer, int max_bytes)
-{
-    // Khởi tạo vòng lặp
-    int i;
-
-    lock->Acquire();            // Khóa line
-    
-    for (i = 0; i < max_bytes; i++)
-    {
-        consoleOutput->PutChar(buffer[i]);
-        waitFor->P();
-    }
-    
-    lock->Release();            // Mở khóa
-}
 //----------------------------------------------------------------------
 // SynchConsoleOutput::CallBack
 //      Interrupt handler called when it's safe to send the next 
