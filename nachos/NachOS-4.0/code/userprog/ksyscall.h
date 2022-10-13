@@ -260,6 +260,7 @@ void SysReadNum()
             temp[0] = '-';
             if (strcmp(temp, "-2147483647") > 0)
                 isInt = false;
+        }
     }
     else {
         // Không phải là số âm:
@@ -286,6 +287,7 @@ void SysReadNum()
             }
             if (strcmp(temp, "2147483647") > 0)
                 isInt = false;            
+        }
     }
     // Kiểm tra các kí tự nhập vào có phải số hay không
     while (buffer[i] != '\0')
