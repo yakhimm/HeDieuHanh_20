@@ -185,7 +185,16 @@ void ExceptionHandler(ExceptionType which) {
                 Output	: Chuỗi ký tự (char*)
                 Used	: Đọc 1 chuỗi ký tự từ người dùng nhập vào
             */
-            SysReadString();
+            // lấy độ dài chuổi cần đọc tức là giá trị của arg 2
+            int length = kernel->machine->ReadRegister(5);
+            // printf("do dai chuoi vua nhap %d", length);
+            if (length > MAXLENGTH || length < 1) {
+                cerr << "\nDo dai chuoi khong hop le\n";
+            }
+            else {
+                SysReadString(length);
+            }
+
             break;
         }
         case SC_PrintString: {
@@ -206,7 +215,7 @@ void ExceptionHandler(ExceptionType which) {
             SysRandomNum();
             break;
         }
-        case SC_ReadNum:{
+        case SC_ReadNum: {
             /*
                 Input	: NULL
                 Output	: Number
