@@ -97,11 +97,13 @@ int SysSub(int op1, int op2) {
     return op1 - op2;
 }
 
-// Các hàm xử lý trong Project
+// Các hàm xử lý trong Project ------------------------------------------------
+
 void SysReadChar()
 {
     // Lấy kí tự từ người dùng nhập vào
     char ch = kernel->synchConsoleIn->GetChar();
+    // Nhận lệnh xuống dòng (enter)
     while (ch != '\n' && kernel->synchConsoleIn->GetChar() != '\n')
     {
 
@@ -208,6 +210,12 @@ void SysReadNum()
     // Biến ch có kiểu char
     char ch;
 
+    // Kiểm tra int 
+    bool isInt = true;
+    // Kiểm tra số - 
+    bool isNegative = false;
+    int result = 0;
+
     // Dùng vòng lặp để đọc chuỗi ký tự nhập vào 
     while (i < MAXLENGTH)
     {
@@ -224,12 +232,6 @@ void SysReadNum()
         buffer[i++] = ch;
     }
 
-    // Kiểm tra int 
-    bool isInt = true;
-    // Kiểm tra số - 
-    bool isNegative = false;
-    int result = 0;
-
     // Kiểm tra số nhập vào có phải là số âm hay không     
     // Kiểm tra tràn số
     if (buffer[0] == '-')
@@ -239,12 +241,25 @@ void SysReadNum()
         i = 1;
         
         if (strlen(buffer) > 11)
-        // Tràn số 
+        // Tràn số về số ký tự
             isInt = false;
-        
-        if (strcmp(buffer, "-2147483647") > 0)
-        // Tràn số âm
-            isInt = false;
+
+        // Tràn số về giá trị 
+        if (isInt)
+        {
+            char *temp = new char[11 + 1];
+            int j = 0;
+            for(j = 0;j < 11;j++)
+                temp[j] = 0;
+            j = strlen(buffer);
+            while (j > 0)
+            {
+                temp[j + i - strlen(buffer)] = buffer[j];
+                j--;
+            }
+            temp[0] = '-';
+            if (strcmp(temp, "-2147483647") > 0)
+                isInt = false;
     }
     else {
         // Không phải là số âm:
@@ -252,12 +267,25 @@ void SysReadNum()
         i = 0;
 
         if (strlen(buffer) > 10) 
-        // Tràn số
+        // Tràn số về số ký tự
             isInt = false;
 
-        if (strcmp(buffer, "2147483647") > 0) 
-        // Tràn số dương
-            isInt = false;
+        // Tràn số về giá trị
+        if (isInt)
+        {
+            char *temp = new char[10 + 1];
+            int j = 0;
+            for(j = 0; j < 10; j++)
+                temp[j] = 0;
+            
+            j = strlen(buffer);
+            while (j >= 0)
+            {
+                temp[j + i - strlen(buffer)] = buffer[j];
+                j--;
+            }
+            if (strcmp(temp, "2147483647") > 0)
+                isInt = false;            
     }
     // Kiểm tra các kí tự nhập vào có phải số hay không
     while (buffer[i] != '\0')
@@ -292,7 +320,7 @@ void SysReadNum()
     }
     else
         result = 0;
-    
+
     // Đưa kết quả vào reg2
     kernel->machine->WriteRegister(2, result);
 }

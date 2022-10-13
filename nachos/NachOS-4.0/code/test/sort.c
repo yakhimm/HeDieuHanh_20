@@ -24,8 +24,7 @@
 
 int A[SIZE];	/* size of physical memory; with code, we'll run out of space!*/
 
-int
-main()
+int main()
 {
     int i, j, tmp;
 
