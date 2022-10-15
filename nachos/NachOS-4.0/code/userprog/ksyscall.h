@@ -182,6 +182,7 @@ void SysPrintString() {
     while (buffer[i] != '\0') {
         kernel->synchConsoleOut->PutChar(buffer[i++]);
     }
+    delete[] buffer;
 }
 
 void SysReadNum() {
@@ -194,17 +195,19 @@ void SysReadNum() {
         return;
     int i = 0;
     char ch;
-
-    // Dùng vòng lặp để đọc chuỗi ký tự nhập vào
+    bool isInt = true;
+    bool isNegative = false;
+    int result = 0;
     while (i < MAXLENGTH) {
         do {
-            // Nhận ký tự từ system
             ch = kernel->synchConsoleIn->GetChar();
         } while (ch == EOF);
         if (ch == '\0' || ch == '\n') // enter -> ket thuc nhap
             break;
         buffer[i++] = ch;
     }
+    buffer[i] = '\0';
+
     // xoá bớt kí tự trắng ở đầu (nếu có)
     while (buffer[0] == ' ') {
         int n = strlen(buffer);
@@ -213,38 +216,44 @@ void SysReadNum() {
         }
         buffer[n - 1] = '\0';
     }
+    // xoá bớt kí tự trắng ở cuối (nếu có)
+    while (buffer[strlen(buffer) - 1] == ' ' && strlen(buffer) > 0) {
+        buffer[strlen(buffer) - 1] = '\0';
+    }
+    if (strlen(buffer) == 0) {
 
-    // Kiểm tra int
-    bool isInt = true;
-    // Kiểm tra số -
-    bool isNegative = false;
-    int result = 0;
+        isInt = false;
+    }
 
     // Kiểm tra số nhập vào có phải là số âm hay không
     // Kiểm tra tràn số
     if (buffer[0] == '-') {
         isNegative = true;
         i = 1;
-
-        if (strlen(buffer) > 11)
-            // Tràn số
+        if (strlen(buffer) > 11) {
             isInt = false;
-
-        if (strcmp(buffer, "-2147483647") > 0)
-            // Tràn số âm
-            isInt = false;
+            printf("bbbbb%d\n", strlen(buffer));
+        }
+        if (strlen(buffer) == 11) {
+            if (strcmp(buffer, "-2147483648") > 0) {
+                isInt = false;
+            }
+            if (strcmp(buffer, "-2147483648") == 0) {
+                result = INT_MIN;
+            }
+        }
     }
     else {
         isNegative = false;
         i = 0;
-
-        if (strlen(buffer) > 10)
-            // Tràn số
+        if (strlen(buffer) > 10) {
             isInt = false;
-
-        if (strcmp(buffer, "2147483647") > 0)
-            // Tràn số dương
-            isInt = false;
+        }
+        if (strlen(buffer) == 10) {
+            if (strcmp(buffer, "2147483647") > 0) {
+                isInt = false;
+            }
+        }
     }
     // Kiểm tra các kí tự nhập vào có phải số hay không
     if (isInt) {
@@ -275,72 +284,72 @@ void SysReadNum() {
         }
     }
     else {
-        // printf("Input khong hop le\n");
+        // printf("Input khong phai so nguyen\n");
         result = 0;
-
-        // Đưa kết quả vào reg2
-        kernel->machine->WriteRegister(2, result);
     }
+    delete[] buffer;
+    kernel->machine->WriteRegister(2, result);
+}
 
-    void SysPrintNum() {
-        /*Input: số nguyên Int
-        Output: NULL
-        CN: In một số nguyên ra màn hình
-        */
-        bool isNegative = false;
-        int so = kernel->machine->ReadRegister(4);
-        int i = 0;
-        char *buffer = new char[12 + 1];
-        if (so == INT_MIN) {
-            strcpy(buffer, "-2147483648");
-            buffer[strlen(buffer)] = '\0';
-            i = 0;
-            while (buffer[i] != '\0') {
-                kernel->synchConsoleOut->PutChar(buffer[i++]);
+void SysPrintNum() {
+    /*Input: số nguyên Int
+    Output: NULL
+    CN: In một số nguyên ra màn hình
+    */
+    bool isNegative = false;
+    int so = kernel->machine->ReadRegister(4);
+    int i = 0;
+    char *buffer = new char[12 + 1];
+    if (so == INT_MIN) {
+        strcpy(buffer, "-2147483648");
+        buffer[strlen(buffer)] = '\0';
+        i = 0;
+        while (buffer[i] != '\0') {
+            kernel->synchConsoleOut->PutChar(buffer[i++]);
+        }
+    }
+    else {
+        if (so != 0) {
+            if (so < 0) {
+                isNegative = true;
+                so = -so;
+            }
+            int chuso = 0;
+            while (so != 0) {
+                chuso = so % 10;
+                buffer[i] = chuso + '0';
+                so = so / 10;
+                i++;
+            }
+            if (isNegative) {
+                buffer[i] = '-';
+                i++;
             }
         }
         else {
-            if (so != 0) {
-                if (so < 0) {
-                    isNegative = true;
-                    so = -so;
-                }
-                int chuso = 0;
-                while (so != 0) {
-                    chuso = so % 10;
-                    buffer[i] = chuso + '0';
-                    so = so / 10;
-                    i++;
-                }
-                if (isNegative) {
-                    buffer[i] = '-';
-                    i++;
-                }
-            }
-            else {
-                buffer[i] = '0';
-                i++;
-            }
-            buffer[i] = '\0';
-            while (i >= 0) {
-                kernel->synchConsoleOut->PutChar(buffer[i--]);
-            }
+            buffer[i] = '0';
+            i++;
         }
-        delete[] buffer;
+        buffer[i] = '\0';
+        while (i >= 0) {
+            kernel->synchConsoleOut->PutChar(buffer[i--]);
+        }
     }
+    delete[] buffer;
+}
 
-    // https://en.wikipedia.org/wiki/Linear_congruential_generator
-    void SysRandomNum() {
-        int seed = kernel->stats->totalTicks;
-        if (FIRSTRAND) {
-            RAND_NUM = seed;
-            FIRSTRAND = false;
-        }
-        RAND_NUM = (RAND_NUM * seed + CONST_C) % MODULUS;
-        if (RAND_NUM < 0) {
-            RAND_NUM = -(RAND_NUM);
-        }
-        kernel->machine->WriteRegister(2, RAND_NUM);
+// https://en.wikipedia.org/wiki/Linear_congruential_generator
+void SysRandomNum() {
+    int seed = kernel->stats->totalTicks;
+    if (FIRSTRAND) {
+        RAND_NUM = seed;
+        FIRSTRAND = false;
     }
+    RAND_NUM = (RAND_NUM * seed + CONST_C) % MODULUS;
+    if (RAND_NUM < 0) {
+        RAND_NUM = -(RAND_NUM);
+    }
+    kernel->machine->WriteRegister(2, RAND_NUM);
+}
 
 #endif /* ! __USERPROG_KSYSCALL_H__ */
