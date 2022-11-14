@@ -11,7 +11,6 @@
 // All rights reserved.  See copyright.h for copyright notice and limitation 
 // of liability and disclaimer of warranty provisions.
 
-
 #include "copyright.h"
 #include "main.h"
 #include "filehdr.h"
@@ -19,6 +18,7 @@
 #include "synchdisk.h"
 
 #ifndef FILESYS_STUB
+
 //----------------------------------------------------------------------
 // OpenFile::OpenFile
 // 	Open a Nachos file for reading and writing.  Bring the file header
@@ -195,6 +195,7 @@ OpenFile::Length()
 }
 
 #else
+
     OpenFile::OpenFile(int f, char* fileName, int fileType) 
     { 
         file = f; 
@@ -213,5 +214,6 @@ OpenFile::Length()
     {
         return fileName;
     }
+
 
 #endif //FILESYS_STUB
