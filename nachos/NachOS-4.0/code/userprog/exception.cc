@@ -233,6 +233,23 @@ void ExceptionHandler(ExceptionType which) {
             SysPrintNum();
             break;
         }
+        case SC_Read: {
+            SysRead();
+        }
+            // case SC_Write: {
+            //     int virtAddr = kernel->machine->ReadRegister(4);
+            //     int size = kernel->machine->ReadRegister(5);
+            //     int id = kernel->machine->ReadRegister(6);
+            //     SysRead(virtAddr, size, id);
+            //     // // Lay du lieu
+            //     // char *buffer = User2System(virtAddr, size);
+            //     // // Ghi vao file
+            //     // int res = SysWrite(buffer, size, id);
+            //     // // Ghi ket qua tra ve
+            //     // kernel->machine->WriteRegister(2, res);
+
+            //     // delete buffer;
+            // }
 
         default:
             cerr << "Unexpected system call " << type << "\n";

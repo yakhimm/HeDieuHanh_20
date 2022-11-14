@@ -351,5 +351,17 @@ void SysRandomNum() {
     }
     kernel->machine->WriteRegister(2, RAND_NUM);
 }
+/* Xu ly syscall Read
+    input: buffer la bo nho can doc, size la so luong ki tu can doc, id la id cua file
+    output -1 neu loi nguoc lai tra ve so ki tu doc duoc
+*/
 
+int SysRead() {
+    // Nguyen dang test may cac sysfile
+    //  kernel->fileSystem->Print();
+    //  kernel->fileSystem->List();
+    //  kernel->fileSystem->Create("asad", 0);
+
+    return 1;
+}
 #endif /* ! __USERPROG_KSYSCALL_H__ */
