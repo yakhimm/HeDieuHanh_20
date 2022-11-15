@@ -10,13 +10,14 @@
 // Copyright (c) 1992-1993 The Regents of the University of California.
 // All rights reserved.  See copyright.h for copyright notice and limitation 
 // of liability and disclaimer of warranty provisions.
-#ifndef FILESYS_STUB
 
 #include "copyright.h"
 #include "main.h"
 #include "filehdr.h"
 #include "openfile.h"
 #include "synchdisk.h"
+
+#ifndef FILESYS_STUB
 
 //----------------------------------------------------------------------
 // OpenFile::OpenFile
@@ -192,5 +193,27 @@ OpenFile::Length()
 { 
     return hdr->FileLength(); 
 }
+
+#else
+
+    OpenFile::OpenFile(int f, char* fileName, int fileType) 
+    { 
+        file = f; 
+        currentOffset = 0; 
+        this->fileType = fileType;
+        this->fileName = new char[strlen(fileName)];
+        strncpy(this->fileName, fileName, strlen(fileName));
+    }
+
+    int OpenFile::GetFileType()
+    {
+        return fileType;
+    }
+
+    char* OpenFile::GetFileName()
+    {
+        return fileName;
+    }
+
 
 #endif //FILESYS_STUB

@@ -1,9 +1,9 @@
-// filesys.cc 
+// filesys.cc
 //	Routines to manage the overall operation of the file system.
 //	Implements routines to map from textual file names to files.
 //
 //	Each file in the file system has:
-//	   A file header, stored in a sector on disk 
+//	   A file header, stored in a sector on disk
 //		(the size of the file header data structure is arranged
 //		to be precisely the size of 1 disk sector)
 //	   A number of data blocks
@@ -15,7 +15,7 @@
 //
 //      Both the bitmap and the directory are represented as normal
 //	files.  Their file headers are located in specific sectors
-//	(sector 0 and sector 1), so that the file system can find them 
+//	(sector 0 and sector 1), so that the file system can find them
 //	on bootup.
 //
 //	The file system assumes that the bitmap and directory files are
@@ -40,37 +40,38 @@
 //	    the file system, it may corrupt the disk)
 //
 // Copyright (c) 1992-1993 The Regents of the University of California.
-// All rights reserved.  See copyright.h for copyright notice and limitation 
+// All rights reserved.  See copyright.h for copyright notice and limitation
 // of liability and disclaimer of warranty provisions.
-#ifndef FILESYS_STUB
 
+#include "filesys.h"
 #include "copyright.h"
 #include "debug.h"
-#include "disk.h"
-#include "pbitmap.h"
 #include "directory.h"
+#include "disk.h"
 #include "filehdr.h"
-#include "filesys.h"
+#include "pbitmap.h"
+
+#ifndef FILESYS_STUB
 
 // Sectors containing the file headers for the bitmap of free sectors,
-// and the directory of files.  These file headers are placed in well-known 
+// and the directory of files.  These file headers are placed in well-known
 // sectors, so that they can be located on boot-up.
-#define FreeMapSector 		0
-#define DirectorySector 	1
+#define FreeMapSector 0
+#define DirectorySector 1
 
 // Initial file sizes for the bitmap and directory; until the file system
-// supports extensible files, the directory size sets the maximum number 
+// supports extensible files, the directory size sets the maximum number
 // of files that can be loaded onto the disk.
-#define FreeMapFileSize 	(NumSectors / BitsInByte)
-#define NumDirEntries 		10
-#define DirectoryFileSize 	(sizeof(DirectoryEntry) * NumDirEntries)
+#define FreeMapFileSize (NumSectors / BitsInByte)
+#define NumDirEntries 10
+#define DirectoryFileSize (sizeof(DirectoryEntry) * NumDirEntries)
 
 //----------------------------------------------------------------------
 // FileSystem::FileSystem
 // 	Initialize the file system.  If format = TRUE, the disk has
 //	nothing on it, and we need to initialize the disk to contain
 //	an empty directory, and a bitmap of free sectors (with almost but
-//	not all of the sectors marked as free).  
+//	not all of the sectors marked as free).
 //
 //	If format = FALSE, we just have to open the files
 //	representing the bitmap and the directory.
@@ -78,65 +79,65 @@
 //	"format" -- should we initialize the disk?
 //----------------------------------------------------------------------
 
-FileSystem::FileSystem(bool format)
-{ 
+FileSystem::FileSystem(bool format) {
     DEBUG(dbgFile, "Initializing the file system.");
     if (format) {
         PersistentBitmap *freeMap = new PersistentBitmap(NumSectors);
         Directory *directory = new Directory(NumDirEntries);
-	FileHeader *mapHdr = new FileHeader;
-	FileHeader *dirHdr = new FileHeader;
+        FileHeader *mapHdr = new FileHeader;
+        FileHeader *dirHdr = new FileHeader;
 
         DEBUG(dbgFile, "Formatting the file system.");
 
-    // First, allocate space for FileHeaders for the directory and bitmap
-    // (make sure no one else grabs these!)
-	freeMap->Mark(FreeMapSector);	    
-	freeMap->Mark(DirectorySector);
+        // First, allocate space for FileHeaders for the directory and bitmap
+        // (make sure no one else grabs these!)
+        freeMap->Mark(FreeMapSector);
+        freeMap->Mark(DirectorySector);
 
-    // Second, allocate space for the data blocks containing the contents
-    // of the directory and bitmap files.  There better be enough space!
+        // Second, allocate space for the data blocks containing the contents
+        // of the directory and bitmap files.  There better be enough space!
 
-	ASSERT(mapHdr->Allocate(freeMap, FreeMapFileSize));
-	ASSERT(dirHdr->Allocate(freeMap, DirectoryFileSize));
+        ASSERT(mapHdr->Allocate(freeMap, FreeMapFileSize));
+        ASSERT(dirHdr->Allocate(freeMap, DirectoryFileSize));
 
-    // Flush the bitmap and directory FileHeaders back to disk
-    // We need to do this before we can "Open" the file, since open
-    // reads the file header off of disk (and currently the disk has garbage
-    // on it!).
+        // Flush the bitmap and directory FileHeaders back to disk
+        // We need to do this before we can "Open" the file, since open
+        // reads the file header off of disk (and currently the disk has garbage
+        // on it!).
 
         DEBUG(dbgFile, "Writing headers back to disk.");
-	mapHdr->WriteBack(FreeMapSector);    
-	dirHdr->WriteBack(DirectorySector);
+        mapHdr->WriteBack(FreeMapSector);
+        dirHdr->WriteBack(DirectorySector);
 
-    // OK to open the bitmap and directory files now
-    // The file system operations assume these two files are left open
-    // while Nachos is running.
+        // OK to open the bitmap and directory files now
+        // The file system operations assume these two files are left open
+        // while Nachos is running.
 
         freeMapFile = new OpenFile(FreeMapSector);
         directoryFile = new OpenFile(DirectorySector);
-     
-    // Once we have the files "open", we can write the initial version
-    // of each file back to disk.  The directory at this point is completely
-    // empty; but the bitmap has been changed to reflect the fact that
-    // sectors on the disk have been allocated for the file headers and
-    // to hold the file data for the directory and bitmap.
+
+        // Once we have the files "open", we can write the initial version
+        // of each file back to disk.  The directory at this point is completely
+        // empty; but the bitmap has been changed to reflect the fact that
+        // sectors on the disk have been allocated for the file headers and
+        // to hold the file data for the directory and bitmap.
 
         DEBUG(dbgFile, "Writing bitmap and directory back to disk.");
-	freeMap->WriteBack(freeMapFile);	 // flush changes to disk
-	directory->WriteBack(directoryFile);
+        freeMap->WriteBack(freeMapFile); // flush changes to disk
+        directory->WriteBack(directoryFile);
 
-	if (debug->IsEnabled('f')) {
-	    freeMap->Print();
-	    directory->Print();
+        if (debug->IsEnabled('f')) {
+            freeMap->Print();
+            directory->Print();
         }
-        delete freeMap; 
-	delete directory; 
-	delete mapHdr; 
-	delete dirHdr;
-    } else {
-    // if we are not formatting the disk, just open the files representing
-    // the bitmap and directory; these are left open while Nachos is running
+        delete freeMap;
+        delete directory;
+        delete mapHdr;
+        delete dirHdr;
+    }
+    else {
+        // if we are not formatting the disk, just open the files representing
+        // the bitmap and directory; these are left open while Nachos is running
         freeMapFile = new OpenFile(FreeMapSector);
         directoryFile = new OpenFile(DirectorySector);
     }
@@ -153,7 +154,7 @@ FileSystem::FileSystem(bool format)
 //        Allocate a sector for the file header
 // 	  Allocate space on disk for the data blocks for the file
 //	  Add the name to the directory
-//	  Store the new file header on disk 
+//	  Store the new file header on disk
 //	  Flush the changes to the bitmap and the directory back to disk
 //
 //	Return TRUE if everything goes ok, otherwise, return FALSE.
@@ -162,7 +163,7 @@ FileSystem::FileSystem(bool format)
 //   		file is already in directory
 //	 	no free space for file header
 //	 	no free entry for file in directory
-//	 	no free space for data blocks for the file 
+//	 	no free space for data blocks for the file
 //
 // 	Note that this implementation assumes there is no concurrent access
 //	to the file system!
@@ -171,8 +172,7 @@ FileSystem::FileSystem(bool format)
 //	"initialSize" -- size of file to be created
 //----------------------------------------------------------------------
 
-bool FileSystem::Create(char *name, int initialSize)
-{
+bool FileSystem::Create(char *name, int initialSize) {
     Directory *directory;
     PersistentBitmap *freeMap;
     FileHeader *hdr;
@@ -185,27 +185,27 @@ bool FileSystem::Create(char *name, int initialSize)
     directory->FetchFrom(directoryFile);
 
     if (directory->Find(name) != -1)
-      success = FALSE;			// file is already in directory
-    else {	
-        freeMap = new PersistentBitmap(freeMapFile,NumSectors);
-        sector = freeMap->FindAndSet();	// find a sector to hold the file header
-    	if (sector == -1) 		
-            success = FALSE;		// no free block for file header 
+        success = FALSE; // file is already in directory
+    else {
+        freeMap = new PersistentBitmap(freeMapFile, NumSectors);
+        sector = freeMap->FindAndSet(); // find a sector to hold the file header
+        if (sector == -1)
+            success = FALSE; // no free block for file header
         else if (!directory->Add(name, sector))
-            success = FALSE;	// no space in directory
-	else {
-    	    hdr = new FileHeader;
-	    if (!hdr->Allocate(freeMap, initialSize))
-            	success = FALSE;	// no space on disk for data
-	    else {	
-	    	success = TRUE;
-		// everthing worked, flush all changes back to disk
-    	    	hdr->WriteBack(sector); 		
-    	    	directory->WriteBack(directoryFile);
-    	    	freeMap->WriteBack(freeMapFile);
-	    }
+            success = FALSE; // no space in directory
+        else {
+            hdr = new FileHeader;
+            if (!hdr->Allocate(freeMap, initialSize))
+                success = FALSE; // no space on disk for data
+            else {
+                success = TRUE;
+                // everthing worked, flush all changes back to disk
+                hdr->WriteBack(sector);
+                directory->WriteBack(directoryFile);
+                freeMap->WriteBack(freeMapFile);
+            }
             delete hdr;
-	}
+        }
         delete freeMap;
     }
     delete directory;
@@ -214,27 +214,26 @@ bool FileSystem::Create(char *name, int initialSize)
 
 //----------------------------------------------------------------------
 // FileSystem::Open
-// 	Open a file for reading and writing.  
+// 	Open a file for reading and writing.
 //	To open a file:
-//	  Find the location of the file's header, using the directory 
+//	  Find the location of the file's header, using the directory
 //	  Bring the header into memory
 //
 //	"name" -- the text name of the file to be opened
 //----------------------------------------------------------------------
 
-OpenFile *FileSystem::Open(char *name)
-{ 
+OpenFile *FileSystem::Open(char *name) {
     Directory *directory = new Directory(NumDirEntries);
     OpenFile *openFile = NULL;
     int sector;
 
     DEBUG(dbgFile, "Opening file" << name);
     directory->FetchFrom(directoryFile);
-    sector = directory->Find(name); 
-    if (sector >= 0) 		
-	openFile = new OpenFile(sector);	// name was found in directory 
+    sector = directory->Find(name);
+    if (sector >= 0)
+        openFile = new OpenFile(sector); // name was found in directory
     delete directory;
-    return openFile;				// return NULL if not found
+    return openFile; // return NULL if not found
 }
 
 //----------------------------------------------------------------------
@@ -251,44 +250,42 @@ OpenFile *FileSystem::Open(char *name)
 //	"name" -- the text name of the file to be removed
 //----------------------------------------------------------------------
 
-bool FileSystem::Remove(char *name)
-{ 
+bool FileSystem::Remove(char *name) {
     Directory *directory;
     PersistentBitmap *freeMap;
     FileHeader *fileHdr;
     int sector;
-    
+
     directory = new Directory(NumDirEntries);
     directory->FetchFrom(directoryFile);
     sector = directory->Find(name);
     if (sector == -1) {
-       delete directory;
-       return FALSE;			 // file not found 
+        delete directory;
+        return FALSE; // file not found
     }
     fileHdr = new FileHeader;
     fileHdr->FetchFrom(sector);
 
-    freeMap = new PersistentBitmap(freeMapFile,NumSectors);
+    freeMap = new PersistentBitmap(freeMapFile, NumSectors);
 
-    fileHdr->Deallocate(freeMap);  		// remove data blocks
-    freeMap->Clear(sector);			// remove header block
+    fileHdr->Deallocate(freeMap); // remove data blocks
+    freeMap->Clear(sector);       // remove header block
     directory->Remove(name);
 
-    freeMap->WriteBack(freeMapFile);		// flush to disk
-    directory->WriteBack(directoryFile);        // flush to disk
+    freeMap->WriteBack(freeMapFile);     // flush to disk
+    directory->WriteBack(directoryFile); // flush to disk
     delete fileHdr;
     delete directory;
     delete freeMap;
     return TRUE;
-} 
+}
 
 //----------------------------------------------------------------------
 // FileSystem::List
 // 	List all the files in the file system directory.
 //----------------------------------------------------------------------
 
-void FileSystem::List()
-{
+void FileSystem::List() {
     Directory *directory = new Directory(NumDirEntries);
 
     directory->FetchFrom(directoryFile);
@@ -306,11 +303,10 @@ void FileSystem::List()
 //	      the data in the file
 //----------------------------------------------------------------------
 
-void FileSystem::Print()
-{
+void FileSystem::Print() {
     FileHeader *bitHdr = new FileHeader;
     FileHeader *dirHdr = new FileHeader;
-    PersistentBitmap *freeMap = new PersistentBitmap(freeMapFile,NumSectors);
+    PersistentBitmap *freeMap = new PersistentBitmap(freeMapFile, NumSectors);
     Directory *directory = new Directory(NumDirEntries);
 
     printf("Bit map file header:\n");
@@ -330,6 +326,93 @@ void FileSystem::Print()
     delete dirHdr;
     delete freeMap;
     delete directory;
-} 
+}
+
+#else
+FileSystem::FileSystem() {
+    openingFile = new OpenFile *[MAX_FILE_NUM];
+
+    for (int i = 0; i < MAX_FILE_NUM; i++) {
+        openingFile[i] = NULL;
+    }
+    this->Create("ConsoleInput");  // phần tử 0 -> ConsoleInput
+    this->Create("ConsoleOutput"); // phần tử 1 -> ConsoleOutput
+    openingFile[0] = this->Open("ConsoleInput", 0);
+    openingFile[1] = this->Open("ConsoleOutput", 0);
+}
+
+FileSystem::~FileSystem() {
+    for (int i = 0; i < MAX_FILE_NUM; i++) {
+        if (openingFile[i] != NULL)
+            openingFile[i] = NULL;
+    }
+    delete[] openingFile;
+}
+
+bool FileSystem::RemoveFileDescriptor(int index) {
+    if (openingFile[index] != NULL) {
+        // delete openingFile[index];
+        openingFile[index] = NULL;
+        return true;
+    }
+    return false;
+}
+
+OpenFile *FileSystem::AssignFileDescriptor(int index, char *filename, int fileType) {
+    if (openingFile[index] == NULL) {
+        openingFile[index] = Open(filename, fileType);
+        return openingFile[index];
+    }
+    return NULL;
+}
+
+int FileSystem::FileDescriptorFree() {
+    for (int i = 2; i < MAX_FILE_NUM; i++) {
+        if (openingFile[i] == NULL)
+            return i;
+    }
+    return -1;
+}
+
+OpenFile *
+FileSystem::Open(char *name, int fileType) {
+    int fileDescriptor = OpenForReadWrite(name, FALSE);
+
+    if (fileDescriptor == -1)
+        return NULL;
+    return new OpenFile(fileDescriptor, name, fileType);
+}
+
+OpenFile *FileSystem::GetFileDescriptor(int index) {
+    return openingFile[index];
+}
+
+OpenFile *FileSystem::GetFileDescriptor(char *filename) {
+    for (int i = 0; i < MAX_FILE_NUM; i++) {
+        if (openingFile[i] != NULL) {
+            char *openfileName = openingFile[i]->GetFileName();
+            if (openfileName != NULL && strcmp(openfileName, filename) == 0) {
+                return openingFile[i];
+            }
+        }
+    }
+    return NULL;
+}
+
+int FileSystem::GetFileDescriptorID(char *filename) {
+    for (int i = 0; i < MAX_FILE_NUM; i++) {
+        if (openingFile[i] != NULL) {
+            char *openfileName = openingFile[i]->GetFileName();
+            if (openfileName != NULL && strcmp(openfileName, filename) == 0) {
+                return i;
+            }
+        }
+    }
+    return -1;
+}
+
+OpenFile *FileSystem::GetFileSpace(int index) {
+    return openingFile[index];
+}
 
 #endif // FILESYS_STUB
