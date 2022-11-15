@@ -135,6 +135,7 @@ void ExceptionHandler(ExceptionType which) {
             SysHalt();
             ASSERTNOTREACHED();
             break;
+
         case SC_Add:
             /*
                 Input	: r4, r5
@@ -142,6 +143,7 @@ void ExceptionHandler(ExceptionType which) {
                 Used	: Tính tổng giá trị của r4 và r5
             */
             break;
+
         case SC_Sub:
             /*
                 Input	: r4 r5
@@ -149,6 +151,15 @@ void ExceptionHandler(ExceptionType which) {
                 Used	: Tính hiệu của giá trị r4 - r5
             */
             break;
+
+        case SC_Create:
+            /*
+                Input	: Register 4 (chứa vùng nhớ của tên file)
+                Output	: Thông báo kết quả tạo file (Lỗi = -1 | Thành công = 0)
+                Used	: Tạo file với tên là filename
+            */
+            break;
+
         case SC_ReadChar: {
             /*
                 Input	: NULL
@@ -158,6 +169,7 @@ void ExceptionHandler(ExceptionType which) {
             SysReadChar();
             break;
         }
+
         case SC_PrintChar: {
             /*
                 Input	: Ký tự (char)
@@ -220,85 +232,6 @@ void ExceptionHandler(ExceptionType which) {
             SysPrintNum();
             break;
         }
-        case SC_Create: {
-            /*
-                Input: filename
-                Output: 0: Thành công, -1: Không thành công
-                Used: Tạo một file mới có tên là filename
-            */
-            SysCreate();
-            break;
-        }
-        case SC_Remove: {
-            /*
-                Input: filename
-                Output: True / False
-                Used: Xóa 1 file có tên là filename
-            */
-            SysRemove();
-            break;
-        }
-        case SC_Open: {
-            /*
-                Input: filename, type
-                Output: 0: thành công, -1: không thành công
-                Used: mở file
-            */
-            SysOpen();
-            break;
-        }
-        case SC_Close: {
-            /*
-                Input: fileid
-                Output: 0: thành công, -1: không thành công
-                Used: đóng file
-            */
-            SysClose();
-            break;
-        }
-        case SC_Read: {
-            /*
-            int Read(char *buffer, int size, OpenFileID id)
-                Input: buffer,size, id
-                Output: số lượng kí tự đọc thành công
-                Used: đọc các kí tự trong file vào buffer
-            */
-            int bufferAddress = kernel->machine->ReadRegister(4);
-            int len = kernel->machine->ReadRegister(5);
-            OpenFileId fileId = kernel->machine->ReadRegister(6);
-
-            if (len < 1 || fileId < 0 || fileId >= MAX_FILE_NUM) {
-                cerr << "Invalid inputed arguments" << type << "\n";
-                DEBUG(dbgFile, "Invalid File ID\n");
-            }
-            else {
-                kernel->machine->WriteRegister(2,
-                                               SysRead(bufferAddress, len, fileId));
-            }
-            break;
-        }
-        case SC_Write: {
-            /*
-            int Write(char *buffer, int size, OpenFileID id)
-                Input: buffer,size, id
-                Output: số lượng kí tự ghi thành công
-                Used: ghi các kí tự trong buffer vào file
-            */
-            int bufferAddress = kernel->machine->ReadRegister(4);
-            int len = kernel->machine->ReadRegister(5);
-            OpenFileId fileId = kernel->machine->ReadRegister(6);
-
-            if (len < 1 || fileId < 0 || fileId >= MAX_FILE_NUM) {
-                cerr << "Invalid inputed arguments" << type << "\n";
-                DEBUG(dbgFile, "Invalid File ID\n");
-            }
-            else {
-                kernel->machine->WriteRegister(2,
-                                               SysWrite(bufferAddress, len, fileId));
-            }
-
-            break;
-        }
 
         default:
             cerr << "Unexpected system call " << type << "\n";
@@ -308,3 +241,9 @@ void ExceptionHandler(ExceptionType which) {
         IncreasePC();
         break;
     }
+
+    default:
+        cerr << "Unexpected user mode exception" << (int)which << "\n";
+        break;
+    }
+}

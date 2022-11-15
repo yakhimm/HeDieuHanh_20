@@ -29,18 +29,8 @@
 					// See definitions listed under #else
 class OpenFile {
   public:
-<<<<<<< HEAD
     OpenFile(int f) { file = f; currentOffset = 0; }	// open the file
     ~OpenFile() { Close(file); }			// close the file
-=======
-    OpenFile(int f) { file = f; currentOffset = 0; fileName=NULL;}	// open the file
-    OpenFile(int f, char* fileName, int fileType);
-	~OpenFile() { 
-		Close(file);
-		if (fileName!=NULL)
-			delete[] fileName;
-	 }			// close the file
->>>>>>> 00435088a4d00c1ec1f59e6aa7991d49587da964
 
     int ReadAt(char *into, int numBytes, int position) { 
     		Lseek(file, position, 0); 
@@ -63,21 +53,9 @@ class OpenFile {
 		}
 
     int Length() { Lseek(file, 0, 2); return Tell(file); }
-<<<<<<< HEAD
     
   private:
     int file;
-=======
-
-	int GetFileType();
-
-	char* GetFileName();
-    
-  private:
-    char* fileName;
-	int fileType; //0: read-write; 1:read-only
-	int file;
->>>>>>> 00435088a4d00c1ec1f59e6aa7991d49587da964
     int currentOffset;
 };
 

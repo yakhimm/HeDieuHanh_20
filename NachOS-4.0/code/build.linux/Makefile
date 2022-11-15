@@ -192,10 +192,6 @@
 # and eventually will not require the symbol definition
 ################################################################
 DEFINES =  -DFILESYS_STUB -DRDATA -DSIM_FIX
-<<<<<<< HEAD
-=======
-# DEFINES =  -DRDATA -DSIM_FIX
->>>>>>> 00435088a4d00c1ec1f59e6aa7991d49587da964
 
 
 #####################################################################
@@ -373,8 +369,4 @@ distclean: clean
 	@echo '# IF YOU PUT STUFF HERE IT WILL GO AWAY' >> Makefile.dep
 	@echo '# see make depend above' >> Makefile.dep
 
-<<<<<<< HEAD
 include Makefile.dep
-=======
-include Makefile.dep
->>>>>>> 00435088a4d00c1ec1f59e6aa7991d49587da964

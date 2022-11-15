@@ -153,11 +153,7 @@ int Remove(char *name);
 /* Open the Nachos file "name", and return an "OpenFileId" that can
  * be used to read and write to the file.
  */
-<<<<<<< HEAD
 OpenFileId Open(char *name);
-=======
-OpenFileId Open(char *name, int type);
->>>>>>> 00435088a4d00c1ec1f59e6aa7991d49587da964
 
 /* Write "size" bytes from "buffer" to the open file.
  * Return the number of bytes actually read on success.
