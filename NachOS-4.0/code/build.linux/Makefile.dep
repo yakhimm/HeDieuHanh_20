@@ -3932,7 +3932,7 @@ pbitmap.o: ../filesys/pbitmap.cc /usr/include/stdc-predef.h \
  /usr/include/c++/9/bits/istream.tcc /usr/include/c++/9/stdlib.h \
  /usr/include/string.h /usr/include/strings.h
 openfile.o: ../filesys/openfile.cc /usr/include/stdc-predef.h \
- ../lib/copyright.h ../threads/main.h ../lib/debug.h ../lib/utility.h \
+ ../filesys/openfile.h ../lib/copyright.h ../lib/utility.h \
  ../lib/sysdep.h /usr/include/c++/9/iostream \
  /usr/include/x86_64-linux-gnu/c++/9/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/9/bits/os_defines.h \
@@ -4069,14 +4069,14 @@ openfile.o: ../filesys/openfile.cc /usr/include/stdc-predef.h \
  /usr/include/c++/9/bits/basic_ios.tcc \
  /usr/include/c++/9/bits/ostream.tcc /usr/include/c++/9/istream \
  /usr/include/c++/9/bits/istream.tcc /usr/include/c++/9/stdlib.h \
- /usr/include/string.h /usr/include/strings.h ../threads/kernel.h \
+ /usr/include/string.h /usr/include/strings.h ../filesys/filehdr.h \
+ ../machine/disk.h ../machine/callback.h ../filesys/pbitmap.h \
+ ../lib/bitmap.h ../threads/main.h ../lib/debug.h ../threads/kernel.h \
  ../threads/thread.h ../machine/machine.h ../machine/translate.h \
- ../userprog/addrspace.h ../filesys/filesys.h ../filesys/openfile.h \
- ../threads/scheduler.h ../lib/list.h ../lib/list.cc \
- ../machine/interrupt.h ../machine/callback.h ../machine/stats.h \
- ../threads/alarm.h ../machine/timer.h ../filesys/filehdr.h \
- ../machine/disk.h ../filesys/pbitmap.h ../lib/bitmap.h \
- ../filesys/synchdisk.h ../threads/synch.h
+ ../userprog/addrspace.h ../filesys/filesys.h ../threads/scheduler.h \
+ ../lib/list.h ../lib/list.cc ../machine/interrupt.h ../machine/stats.h \
+ ../threads/alarm.h ../machine/timer.h ../filesys/synchdisk.h \
+ ../threads/synch.h
 synchdisk.o: ../filesys/synchdisk.cc /usr/include/stdc-predef.h \
  ../lib/copyright.h ../filesys/synchdisk.h ../machine/disk.h \
  ../lib/utility.h ../machine/callback.h ../threads/synch.h \

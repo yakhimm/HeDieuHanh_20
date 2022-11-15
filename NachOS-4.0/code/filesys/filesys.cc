@@ -411,8 +411,4 @@ int FileSystem::GetFileDescriptorID(char *filename) {
     return -1;
 }
 
-OpenFile *FileSystem::GetFileSpace(int index) {
-    return openingFile[index];
-}
-
 #endif // FILESYS_STUB

@@ -1,4 +1,4 @@
-// openfile.cc 
+// openfile.cc
 //	Routines to manage an open Nachos file.  As in UNIX, a
 //	file must be open before we can read or write to it.
 //	Once we're all done, we can close it (in Nachos, by deleting
@@ -8,13 +8,13 @@
 //	memory while the file is open.
 //
 // Copyright (c) 1992-1993 The Regents of the University of California.
-// All rights reserved.  See copyright.h for copyright notice and limitation 
+// All rights reserved.  See copyright.h for copyright notice and limitation
 // of liability and disclaimer of warranty provisions.
 
-#include "copyright.h"
-#include "main.h"
-#include "filehdr.h"
 #include "openfile.h"
+#include "copyright.h"
+#include "filehdr.h"
+#include "main.h"
 #include "synchdisk.h"
 
 #ifndef FILESYS_STUB
@@ -27,8 +27,7 @@
 //	"sector" -- the location on disk of the file header for this file
 //----------------------------------------------------------------------
 
-OpenFile::OpenFile(int sector)
-{ 
+OpenFile::OpenFile(int sector) {
     hdr = new FileHeader;
     hdr->FetchFrom(sector);
     seekPosition = 0;
@@ -39,8 +38,7 @@ OpenFile::OpenFile(int sector)
 // 	Close a Nachos file, de-allocating any in-memory data structures.
 //----------------------------------------------------------------------
 
-OpenFile::~OpenFile()
-{
+OpenFile::~OpenFile() {
     delete hdr;
 }
 
@@ -52,11 +50,9 @@ OpenFile::~OpenFile()
 //	"position" -- the location within the file for the next Read/Write
 //----------------------------------------------------------------------
 
-void
-OpenFile::Seek(int position)
-{
+void OpenFile::Seek(int position) {
     seekPosition = position;
-}	
+}
 
 //----------------------------------------------------------------------
 // OpenFile::Read/Write
@@ -66,25 +62,23 @@ OpenFile::Seek(int position)
 //
 //	Implemented using the more primitive ReadAt/WriteAt.
 //
-//	"into" -- the buffer to contain the data to be read from disk 
-//	"from" -- the buffer containing the data to be written to disk 
+//	"into" -- the buffer to contain the data to be read from disk
+//	"from" -- the buffer containing the data to be written to disk
 //	"numBytes" -- the number of bytes to transfer
 //----------------------------------------------------------------------
 
-int
-OpenFile::Read(char *into, int numBytes)
-{
-   int result = ReadAt(into, numBytes, seekPosition);
-   seekPosition += result;
-   return result;
+int OpenFile::Read(char *into, int numBytes) {
+
+    int result = ReadAt(into, numBytes, seekPosition);
+
+    seekPosition += result;
+    return result;
 }
 
-int
-OpenFile::Write(char *into, int numBytes)
-{
-   int result = WriteAt(into, numBytes, seekPosition);
-   seekPosition += result;
-   return result;
+int OpenFile::Write(char *into, int numBytes) {
+    int result = WriteAt(into, numBytes, seekPosition);
+    seekPosition += result;
+    return result;
 }
 
 //----------------------------------------------------------------------
@@ -106,24 +100,22 @@ OpenFile::Write(char *into, int numBytes)
 //	   in the data that will be modified, and write back all the full
 //	   or partial sectors that are part of the request.
 //
-//	"into" -- the buffer to contain the data to be read from disk 
-//	"from" -- the buffer containing the data to be written to disk 
+//	"into" -- the buffer to contain the data to be read from disk
+//	"from" -- the buffer containing the data to be written to disk
 //	"numBytes" -- the number of bytes to transfer
 //	"position" -- the offset within the file of the first byte to be
 //			read/written
 //----------------------------------------------------------------------
 
-int
-OpenFile::ReadAt(char *into, int numBytes, int position)
-{
+int OpenFile::ReadAt(char *into, int numBytes, int position) {
     int fileLength = hdr->FileLength();
     int i, firstSector, lastSector, numSectors;
     char *buf;
 
     if ((numBytes <= 0) || (position >= fileLength))
-    	return 0; 				// check request
-    if ((position + numBytes) > fileLength)		
-	numBytes = fileLength - position;
+        return 0; // check request
+    if ((position + numBytes) > fileLength)
+        numBytes = fileLength - position;
     DEBUG(dbgFile, "Reading " << numBytes << " bytes at " << position << " from file of length " << fileLength);
 
     firstSector = divRoundDown(position, SectorSize);
@@ -132,28 +124,26 @@ OpenFile::ReadAt(char *into, int numBytes, int position)
 
     // read in all the full and partial sectors that we need
     buf = new char[numSectors * SectorSize];
-    for (i = firstSector; i <= lastSector; i++)	
-        kernel->synchDisk->ReadSector(hdr->ByteToSector(i * SectorSize), 
-					&buf[(i - firstSector) * SectorSize]);
+    for (i = firstSector; i <= lastSector; i++)
+        kernel->synchDisk->ReadSector(hdr->ByteToSector(i * SectorSize),
+                                      &buf[(i - firstSector) * SectorSize]);
 
     // copy the part we want
     bcopy(&buf[position - (firstSector * SectorSize)], into, numBytes);
-    delete [] buf;
+    delete[] buf;
     return numBytes;
 }
 
-int
-OpenFile::WriteAt(char *from, int numBytes, int position)
-{
+int OpenFile::WriteAt(char *from, int numBytes, int position) {
     int fileLength = hdr->FileLength();
     int i, firstSector, lastSector, numSectors;
     bool firstAligned, lastAligned;
     char *buf;
 
     if ((numBytes <= 0) || (position >= fileLength))
-	return 0;				// check request
+        return 0; // check request
     if ((position + numBytes) > fileLength)
-	numBytes = fileLength - position;
+        numBytes = fileLength - position;
     DEBUG(dbgFile, "Writing " << numBytes << " bytes at " << position << " from file of length " << fileLength);
 
     firstSector = divRoundDown(position, SectorSize);
@@ -165,21 +155,21 @@ OpenFile::WriteAt(char *from, int numBytes, int position)
     firstAligned = (position == (firstSector * SectorSize));
     lastAligned = ((position + numBytes) == ((lastSector + 1) * SectorSize));
 
-// read in first and last sector, if they are to be partially modified
+    // read in first and last sector, if they are to be partially modified
     if (!firstAligned)
-        ReadAt(buf, SectorSize, firstSector * SectorSize);	
+        ReadAt(buf, SectorSize, firstSector * SectorSize);
     if (!lastAligned && ((firstSector != lastSector) || firstAligned))
-        ReadAt(&buf[(lastSector - firstSector) * SectorSize], 
-				SectorSize, lastSector * SectorSize);	
+        ReadAt(&buf[(lastSector - firstSector) * SectorSize],
+               SectorSize, lastSector * SectorSize);
 
-// copy in the bytes we want to change 
+    // copy in the bytes we want to change
     bcopy(from, &buf[position - (firstSector * SectorSize)], numBytes);
 
-// write modified sectors back
-    for (i = firstSector; i <= lastSector; i++)	
-        kernel->synchDisk->WriteSector(hdr->ByteToSector(i * SectorSize), 
-					&buf[(i - firstSector) * SectorSize]);
-    delete [] buf;
+    // write modified sectors back
+    for (i = firstSector; i <= lastSector; i++)
+        kernel->synchDisk->WriteSector(hdr->ByteToSector(i * SectorSize),
+                                       &buf[(i - firstSector) * SectorSize]);
+    delete[] buf;
     return numBytes;
 }
 
@@ -188,31 +178,26 @@ OpenFile::WriteAt(char *from, int numBytes, int position)
 // 	Return the number of bytes in the file.
 //----------------------------------------------------------------------
 
-int
-OpenFile::Length() 
-{ 
-    return hdr->FileLength(); 
+int OpenFile::Length() {
+    return hdr->FileLength();
 }
 
 #else
 
-    OpenFile::OpenFile(int f, char* fileName, int fileType) 
-    { 
-        file = f; 
-        currentOffset = 0; 
-        this->fileType = fileType;
-        this->fileName = new char[strlen(fileName)];
-        strncpy(this->fileName, fileName, strlen(fileName));
-    }
+OpenFile::OpenFile(int f, char *fileName, int fileType) {
+    file = f;
+    currentOffset = 0;
+    this->fileType = fileType;
+    this->fileName = new char[strlen(fileName)];
+    strncpy(this->fileName, fileName, strlen(fileName));
+}
 
-    int OpenFile::GetFileType()
-    {
-        return fileType;
-    }
+int OpenFile::GetFileType() {
+    return fileType;
+}
 
-    char* OpenFile::GetFileName()
-    {
-        return fileName;
-    }
+char *OpenFile::GetFileName() {
+    return fileName;
+}
 
-#endif //FILESYS_STUB
+#endif // FILESYS_STUB

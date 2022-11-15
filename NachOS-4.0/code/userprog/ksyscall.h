@@ -38,7 +38,7 @@ char *User2System(int virtAddr, int limit) {
     int i; // index
     int oneChar;
     char *kernelBuf = NULL;
-    kernelBuf = new char[limit + 1]; // need for terminal string
+    kernelBuf = new char[limit + 1];
 
     if (kernelBuf == NULL)
         return kernelBuf;
@@ -390,24 +390,29 @@ void SysPrintNum() {
 }
 
 void SysCreate() {
+
     int result;
     char *filename;
     int filenameAddr = kernel->machine->ReadRegister(4);
-    
+
     filename = User2System(filenameAddr, FILENAME_MAX + 1);
 
-    if (strlen(filename) == 0 || filename == NULL)
-    {
+    if (strlen(filename) == 0 || filename == NULL) {
         printf("\nFile name is not default");
         DEBUG(dbgSys, "\nFile name is not default");
         result = -1;
     }
-    else 
+    else
         // Tạo file rỗng
-        if (kernel->fileSystem->Create(filename) == true)
+
+        if (kernel->fileSystem->Create(filename) == true) {
+            // printf("\nhere1");
+            // printf("\nCreating file '%s' successful !!", filename);
+            // printf("\nhere2");
             result = 0;
+        }
         else {
-            printf("Creating file '%s' is not successful !!", filename); 
+            printf("\nCreating file '%s' is not successful !!", filename);
             result = -1;
         }
 
@@ -419,7 +424,7 @@ void SysCreate() {
 void SysRemove() {
     int result;
     int ptr = kernel->machine->ReadRegister(4);
-    char* filename = User2System(ptr, MAXLENGTH);
+    char *filename = User2System(ptr, MAXLENGTH);
 
     if (filename == NULL || strlen(filename) < 1) {
         kernel->machine->WriteRegister(2, -1);
@@ -428,9 +433,8 @@ void SysRemove() {
         return;
     }
 
-    OpenFile* is_opening = kernel->fileSystem->GetFileDescriptor(filename);
-    if (is_opening != NULL)
-    {
+    OpenFile *is_opening = kernel->fileSystem->GetFileDescriptor(filename);
+    if (is_opening != NULL) {
         printf("File is opening !! Close file to remove");
         DEBUG(dbgSys, "File is opening !! Close file to remove !!");
         kernel->machine->WriteRegister(2, 0);
@@ -467,7 +471,7 @@ void SysOpen() {
     }
 
     int fileIDfree = kernel->fileSystem->FileDescriptorFree();
-    printf("%d here\n", openfile);
+    // printf("%d here\n", openfile);
     if (fileIDfree == -1) {
         kernel->machine->WriteRegister(2, -1);
         delete[] filename;
@@ -537,8 +541,8 @@ int SysRead(int bufferAddress, int lenBuffer, OpenFileId fileId) {
             return -1;
         for (i = 0; i < lenBuffer; ++i) {
             ch = kernel->synchConsoleIn->GetChar();
-            if (ch == NULL) {
-                buffer[i] = NULL;
+            if (ch == 0) {
+                buffer[i] = 0;
                 break;
             }
             buffer[i] = ch;
@@ -572,13 +576,13 @@ int SysRead(int bufferAddress, int lenBuffer, OpenFileId fileId) {
     default: {
         char *buffer = new char[lenBuffer + 1];
         // lấy con trỏ vùng nhớ của file cần đọc
-        OpenFile *file2read = kernel->fileSystem->GetFileSpace(fileId);
-        if (!file2read)
-            printf("go here\n");
+
+        // if (!file2read)
+        //     printf("\ngo her\n");
 
         //đọc nội dung file vào buffer và lưu số byte đọc được vào cntChar
-        cntChar = file2read->Read(buffer, lenBuffer);
 
+        cntChar = kernel->fileSystem->GetFileDescriptor(fileId)->Read(buffer, lenBuffer);
         if (cntChar > 0) {
             buffer[cntChar] = 0;
             System2User(bufferAddress, buffer, cntChar);
@@ -586,6 +590,7 @@ int SysRead(int bufferAddress, int lenBuffer, OpenFileId fileId) {
 
         else {
             DEBUG(dbgFile, "File empty\n");
+            printf("\nread error");
         }
         delete[] buffer;
         break;
@@ -628,7 +633,7 @@ int SysWrite(int bufferAddress, int lenBuffer, OpenFileId fileId) {
     }
     default: {
         char *buffer = User2System(bufferAddress, lenBuffer);
-        OpenFile *file2write = kernel->fileSystem->GetFileSpace(fileId);
+        OpenFile *file2write = kernel->fileSystem->GetFileDescriptor(fileId);
         if (!buffer) {
             DEBUG(dbgAddr, "Cap phat khong thanh cong\n");
             SysHalt();
@@ -640,7 +645,7 @@ int SysWrite(int bufferAddress, int lenBuffer, OpenFileId fileId) {
         else {
         }
         cntChar = file2write->Write(buffer, lenBuffer);
-        if (cntChar > 0) 
+        if (cntChar > 0)
             buffer[cntChar] = 0;
         delete[] buffer;
     }
