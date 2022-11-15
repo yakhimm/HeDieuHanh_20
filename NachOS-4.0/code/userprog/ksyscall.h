@@ -639,12 +639,9 @@ int SysWrite(int bufferAddress, int lenBuffer, OpenFileId fileId) {
         }
         else {
         }
-
         cntChar = file2write->Write(buffer, lenBuffer);
-
         if (cntChar > 0) 
             buffer[cntChar] = 0;
-        
         delete[] buffer;
     }
     }
