@@ -85,7 +85,6 @@ public:
 private:
     OpenFile **openingFile; // mảng file descriptor table
 };
-
 #else // FILESYS
 class FileSystem {
 public:

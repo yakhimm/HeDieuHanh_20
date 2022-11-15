@@ -296,7 +296,6 @@ void ExceptionHandler(ExceptionType which) {
                 kernel->machine->WriteRegister(2,
                                                SysWrite(bufferAddress, len, fileId));
             }
-
             break;
         }
 

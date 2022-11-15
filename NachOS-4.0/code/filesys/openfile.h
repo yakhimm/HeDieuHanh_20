@@ -104,5 +104,4 @@ class OpenFile {
 };
 
 #endif // FILESYS
-
 #endif // OPENFILE_H

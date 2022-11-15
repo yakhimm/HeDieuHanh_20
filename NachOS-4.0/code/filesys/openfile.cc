@@ -215,5 +215,4 @@ OpenFile::Length()
         return fileName;
     }
 
-
 #endif //FILESYS_STUB
