@@ -193,4 +193,25 @@ OpenFile::Length()
     return hdr->FileLength(); 
 }
 
+#else
+
+    OpenFile::OpenFile(int f, char* fileName, int fileType) 
+    { 
+        file = f; 
+        currentOffset = 0; 
+        this->fileType = fileType;
+        this->fileName = new char[strlen(fileName)];
+        strncpy(this->fileName, fileName, strlen(fileName));
+    }
+
+    int OpenFile::GetFileType()
+    {
+        return fileType;
+    }
+
+    char* OpenFile::GetFileName()
+    {
+        return fileName;
+    }
+
 #endif //FILESYS_STUB
