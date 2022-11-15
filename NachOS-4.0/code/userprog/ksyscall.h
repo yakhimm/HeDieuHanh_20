@@ -389,6 +389,59 @@ void SysPrintNum() {
     delete[] buffer;
 }
 
+void SysCreate() {
+    int result;
+    char *filename;
+    int filenameAddr = kernel->machine->ReadRegister(4);
+    
+    filename = User2System(filenameAddr, FILENAME_MAX + 1);
+
+    if (strlen(filename) == 0 || filename == NULL)
+    {
+        printf("\nFile name is not default");
+        DEBUG(dbgSys, "\nFile name is not default");
+        result = -1;
+    }
+    else 
+        // Tạo file rỗng
+        if (kernel->fileSystem->Create(filename) == true)
+            result = 0;
+        else {
+            printf("Creating file '%s' is not successful !!", filename); 
+            result = -1;
+        }
+
+    // Write thì cần lệnh read num
+    kernel->machine->WriteRegister(2, result);
+    delete[] filename;
+}
+
+void SysRemove() {
+    int result;
+    int ptr = kernel->machine->ReadRegister(4);
+    char* filename = User2System(ptr, MAXLENGTH);
+
+    if (filename == NULL || strlen(filename) < 1) {
+        kernel->machine->WriteRegister(2, -1);
+        if (filename)
+            delete[] filename;
+        return;
+    }
+
+    OpenFile* is_opening = kernel->fileSystem->GetFileDescriptor(filename);
+    if (is_opening != NULL)
+    {
+        printf("File is opening !! Close file to remove");
+        DEBUG(dbgSys, "File is opening !! Close file to remove !!");
+        kernel->machine->WriteRegister(2, 0);
+    }
+    else {
+        result = kernel->fileSystem->Remove(filename);
+        kernel->machine->WriteRegister(2, result);
+    }
+    delete[] filename;
+}
+
 void SysOpen() {
     int filenameAddr = kernel->machine->ReadRegister(4);
     int fileType = kernel->machine->ReadRegister(5);
