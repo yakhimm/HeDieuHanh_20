@@ -275,7 +275,6 @@ void ExceptionHandler(ExceptionType which) {
                 kernel->machine->WriteRegister(2,
                                                SysRead(bufferAddress, len, fileId));
             }
-
             break;
         }
         case SC_Write: {
