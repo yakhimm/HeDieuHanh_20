@@ -123,7 +123,7 @@ void ExceptionHandler(ExceptionType which) {
 
     case SyscallException: {
         switch (type) {
-        case SC_Halt:
+        case SC_Halt: {
             /*
                 Input	: NULL
                 Output	: Notify for shut down
@@ -135,31 +135,23 @@ void ExceptionHandler(ExceptionType which) {
             SysHalt();
             ASSERTNOTREACHED();
             break;
-
-        case SC_Add:
+        }
+        case SC_Add: {
             /*
                 Input	: r4, r5
                 Output	: NULL
                 Used	: Tính tổng giá trị của r4 và r5
             */
             break;
-
-        case SC_Sub:
+        }
+        case SC_Sub: {
             /*
                 Input	: r4 r5
                 Output	: NULL
                 Used	: Tính hiệu của giá trị r4 - r5
             */
             break;
-
-        case SC_Create:
-            /*
-                Input	: Register 4 (chứa vùng nhớ của tên file)
-                Output	: Thông báo kết quả tạo file (Lỗi = -1 | Thành công = 0)
-                Used	: Tạo file với tên là filename
-            */
-            break;
-
+        }
         case SC_ReadChar: {
             /*
                 Input	: NULL
