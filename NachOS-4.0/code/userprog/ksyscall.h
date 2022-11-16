@@ -26,7 +26,7 @@
 #define MODULUS 2147483647
 #define CONST_C 16807
 #define INT_MIN (-2147483647 - 1)
-
+#define FILENAME_MAXLEN 32
 bool FIRSTRAND = true;
 int RAND_NUM = 0;
 
@@ -34,8 +34,7 @@ int RAND_NUM = 0;
 // - Limit of buffer (int)
 // Output:- Buffer (char*)
 // Purpose: Copy buffer from User memory space to System memory space
-char* User2System(int virtAddr, int limit)
-{
+char *User2System(int virtAddr, int limit) {
     int i; // index
     int oneChar;
     char *kernelBuf = NULL;
@@ -45,8 +44,7 @@ char* User2System(int virtAddr, int limit)
         return kernelBuf;
     memset(kernelBuf, 0, limit + 1);
 
-    for (i = 0; i < limit; i++)
-    {
+    for (i = 0; i < limit; i++) {
         kernel->machine->ReadMem(virtAddr + i, 1, &oneChar);
         kernelBuf[i] = (char)oneChar;
         if (oneChar == 0)
@@ -60,14 +58,12 @@ char* User2System(int virtAddr, int limit)
 // - Buffer (char[])
 // Output:- Number of bytes copied (int)
 // Purpose: Copy buffer from System memory space to User memory space
-int System2User(int virtAddr, char *buffer, int len)
-{
+int System2User(int virtAddr, char *buffer, int len) {
     if (len <= 0)
         return len;
     int i = 0;
     int oneChar = 0;
-    do
-    {
+    do {
         oneChar = (int)buffer[i];
         kernel->machine->WriteMem(virtAddr + i, 1, oneChar);
         i++;
@@ -103,29 +99,26 @@ int SysSub(int op1, int op2) {
 
 // Các hàm xử lý trong Project ------------------------------------------------
 
-void SysReadChar()
-{
+void SysReadChar() {
     // Lấy kí tự từ người dùng nhập vào
     char ch = kernel->synchConsoleIn->GetChar();
     // Nhận lệnh xuống dòng (enter)
     while (ch != '\n' && kernel->synchConsoleIn->GetChar() != '\n') {
         // Do nothing !!
-    }    
-    // Ghi dữ liệu ký tự vào reg2 
+    }
+    // Ghi dữ liệu ký tự vào reg2
     kernel->machine->WriteRegister(2, ch);
 }
 
-void SysPrintChar()
-{
+void SysPrintChar() {
     // Lấy dữ liệu từ reg4
     char ch = (char)kernel->machine->ReadRegister(4);
     // Đưa lên system
     kernel->synchConsoleOut->PutChar(ch);
 }
 
-void SysReadString(int length)
-{
-     // Tạo chuỗi ký tự buffer
+void SysReadString(int length) {
+    // Tạo chuỗi ký tự buffer
     char *buffer = new char[length + 1];
     // Nếu buffer == NULL thì kết thúc (Do không đủ vùng nhớ để tạo)
     if (!buffer)
@@ -171,8 +164,7 @@ void SysReadString(int length)
     delete[] buffer;
 }
 
-void SysPrintString()
-{
+void SysPrintString() {
     // Vị trí (index) của ký tự
     int i = 0;
     // Lấy giá trị (value) từ reg4
@@ -182,8 +174,8 @@ void SysPrintString()
     // Với virAdd = ptr (giá trị reg4)
     //     len = MAXLENGTH (độ dài của buffer người dùng)
     // Trả về giá trị char* (chuỗi dữ liệu) từ người dùng (user) gán vào char* buffer của hệ thống (system)
-    char* buffer = User2System(ptr, MAXLENGTH);
-    
+    char *buffer = User2System(ptr, MAXLENGTH);
+
     // Dùng vòng lặp để đưa lên hệ thống (system)
     while (buffer[i] != '\0') {
         kernel->synchConsoleOut->PutChar(buffer[i++]);
@@ -192,8 +184,7 @@ void SysPrintString()
 }
 
 // https://en.wikipedia.org/wiki/Linear_congruential_generator
-void SysRandomNum()
-{
+void SysRandomNum() {
     int seed = kernel->stats->totalTicks;
     if (FIRSTRAND) {
         RAND_NUM = seed;
@@ -206,8 +197,7 @@ void SysRandomNum()
     kernel->machine->WriteRegister(2, RAND_NUM);
 }
 
-void SysReadNum()
-{
+void SysReadNum() {
     /*
         Input   : NULL
         Output  : Số nguyên Int
@@ -223,36 +213,27 @@ void SysReadNum()
     int i = 0;
     // Biến ch có kiểu char
     char ch;
-    // Kiểm tra int 
+    // Kiểm tra int
     bool isInt = true;
-    // Kiểm tra số - 
+    // Kiểm tra số -
     bool isNegative = false;
     // Lưu kết quả trả về
     int result = 0;
 
-    // Dùng vòng lặp để đọc chuỗi ký tự nhập vào 
-    while (i < MAXLENGTH)
-    {
-        do
-        {
+    // Dùng vòng lặp để đọc chuỗi ký tự nhập vào
+    while (i < MAXLENGTH) {
+        do {
             // Nhận ký tự từ system
             ch = kernel->synchConsoleIn->GetChar();
         } while (ch == EOF);
         // Khi nhập: Enter -> ket thuc nhap
-        if (ch == '\0' || ch == '\n') 
+        if (ch == '\0' || ch == '\n')
             break;
-        
+
         // Lưu ký tự vào chuỗi ký tự buffer
         buffer[i++] = ch;
     }
-    /*
-            Trong quá trình test, có xuất hiện 1 bug mà chúng em chưa hiểu:
-        Khi nhập vào đến ký tự thứ 8 thì strlen() bị lỗi gì đó và tự động
-        lấy độ dài của chuỗi là 17, với mọi trường hợp, còn khi số ký tự dưới
-        7 thì strlen() hoạt động đúng với cơ chế của nó.
-            Tụi em thử fix và thêm phần tử \0 xuống buffer ở vị trí thứ i
-            Và nó đã hoạt động tốt.
-    */
+
     buffer[i] = '\0';
 
     // Xoá bớt kí tự trắng ở đầu (nếu có)
@@ -270,29 +251,28 @@ void SysReadNum()
     }
 
     // Nếu người dùng không nhập thì xuất ra là 0
-    if (strlen(buffer) == 0) 
+    if (strlen(buffer) == 0)
         isInt = false;
 
-    // Kiểm tra số nhập vào có phải là số âm hay không     
+    // Kiểm tra số nhập vào có phải là số âm hay không
     // Kiểm tra tràn số
-    if (buffer[0] == '-')
-    {
+    if (buffer[0] == '-') {
         // Nếu là số âm:
         isNegative = true;
         i = 1;
-        
+
         if (strlen(buffer) > 11)
-        // Tràn số về số ký tự
+            // Tràn số về số ký tự
             isInt = false;
 
-        // Tràn số về giá trị 
+        // Tràn số về giá trị
         if (strlen(buffer) == 11) {
             if (strcmp(buffer, "-2147483648") > 0)
-            // Giá trị bị vượt biên -> không phải int
+                // Giá trị bị vượt biên -> không phải int
                 isInt = false;
-            
+
             if (strcmp(buffer, "-2147483648") == 0)
-            // Kết quả ngay tại biên
+                // Kết quả ngay tại biên
                 result = INT_MIN;
         }
     }
@@ -301,19 +281,19 @@ void SysReadNum()
         isNegative = false;
         i = 0;
 
-        if (strlen(buffer) > 10) 
-        // Tràn số về số ký tự
+        if (strlen(buffer) > 10)
+            // Tràn số về số ký tự
             isInt = false;
 
         // Tràn số về giá trị
-        if (strlen(buffer) == 10) 
-            if (strcmp(buffer, "2147483647") > 0) 
-            // Giá trị vượt biên -> không phải int
+        if (strlen(buffer) == 10)
+            if (strcmp(buffer, "2147483647") > 0)
+                // Giá trị vượt biên -> không phải int
                 isInt = false;
     }
-    
+
     // Kiểm tra các kí tự nhập vào có phải số hay không
-    if (isInt) 
+    if (isInt)
         while (buffer[i] != '\0') {
             if (buffer[i] < 48 || buffer[i] > 57) {
                 // Không phải là ký tự số
@@ -330,15 +310,15 @@ void SysReadNum()
         if (result != INT_MIN) {
             i = 0;
             if (isNegative)
-            // Nếu là số âm thì index = 1 (vị trí bắt đầu số)
+                // Nếu là số âm thì index = 1 (vị trí bắt đầu số)
                 i = 1;
-            
+
             // Đọc số từ buffer
             while (buffer[i] != '\0') {
                 num = num * 10 + int(buffer[i]) - '0';
                 i++;
             }
-            
+
             // Trả về kết quả (là trị tuyệt đối)
             if (isNegative) {
                 num = -num;
@@ -354,9 +334,8 @@ void SysReadNum()
     kernel->machine->WriteRegister(2, result);
 }
 
-void SysPrintNum()
-{
-    /* 
+void SysPrintNum() {
+    /*
         Input   : Số nguyên Int
         Output  : NULL
         Used    : In một số nguyên ra màn hình
@@ -365,12 +344,12 @@ void SysPrintNum()
     bool isNegative = false;
     // Đọc number từ reg4
     int number = kernel->machine->ReadRegister(4);
-    // Vị trí (index) 
+    // Vị trí (index)
     int i = 0;
     // Chuỗi ký tự (buffer)
     char *buffer = new char[12 + 1];
 
-    // Kiểm tra number có = 0 hay không 
+    // Kiểm tra number có = 0 hay không
     // Nếu number != 0:
     if (number == INT_MIN) {
         strcpy(buffer, "-2147483648");

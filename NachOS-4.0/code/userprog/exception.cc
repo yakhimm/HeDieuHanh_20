@@ -123,7 +123,7 @@ void ExceptionHandler(ExceptionType which) {
 
     case SyscallException: {
         switch (type) {
-        case SC_Halt: {
+        case SC_Halt:
             /*
                 Input	: NULL
                 Output	: Notify for shut down
@@ -135,23 +135,20 @@ void ExceptionHandler(ExceptionType which) {
             SysHalt();
             ASSERTNOTREACHED();
             break;
-        }
-        case SC_Add: {
+        case SC_Add:
             /*
                 Input	: r4, r5
                 Output	: NULL
                 Used	: Tính tổng giá trị của r4 và r5
             */
             break;
-        }
-        case SC_Sub: {
+        case SC_Sub:
             /*
                 Input	: r4 r5
                 Output	: NULL
                 Used	: Tính hiệu của giá trị r4 - r5
             */
             break;
-        }
         case SC_ReadChar: {
             /*
                 Input	: NULL
@@ -161,7 +158,6 @@ void ExceptionHandler(ExceptionType which) {
             SysReadChar();
             break;
         }
-
         case SC_PrintChar: {
             /*
                 Input	: Ký tự (char)
@@ -305,10 +301,10 @@ void ExceptionHandler(ExceptionType which) {
         }
         case SC_Seek: {
             /*
-            int Seek(int position, OpenFileID id)
-            Input: position,id
-            Output: vị trí trong file
-            Used:
+                int Seek(int position, OpenFileID id)
+                Input: position,id
+                Output: vị trí trong file
+                Used:
             */
             int pos = kernel->machine->ReadRegister(4);
             int fileId = kernel->machine->ReadRegister(5);

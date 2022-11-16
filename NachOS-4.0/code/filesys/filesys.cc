@@ -330,9 +330,6 @@ void FileSystem::Print()
     delete dirHdr;
     delete freeMap;
     delete directory;
-<<<<<<< HEAD
-} 
-=======
 }
 
 #else
@@ -422,6 +419,5 @@ int OpenFile::Seek(int pos) {
     currentOffset = Tell(file);
     return currentOffset;
 }
->>>>>>> aeb9bea3beb13073a107fedfa1bd94d0d0b2400f
 
 #endif // FILESYS_STUB
