@@ -291,6 +291,7 @@ void ExceptionHandler(ExceptionType which) {
             if (len < 1 || fileId < 0 || fileId >= MAX_FILE_NUM) {
                 cerr << "Invalid inputed arguments" << type << "\n";
                 DEBUG(dbgFile, "Invalid File ID\n");
+                kernel->machine->WriteRegister(2, -1);
             }
             else {
                 kernel->machine->WriteRegister(2,
@@ -298,9 +299,36 @@ void ExceptionHandler(ExceptionType which) {
             }
             break;
         }
+        case SC_Seek: {
+
+            /*
+            int Seek(int position, OpenFileID id)
+            Input: position,id
+            Output: vị trí trong file
+            Used:
+            */
+            int pos = kernel->machine->ReadRegister(4);
+            int fileId = kernel->machine->ReadRegister(5);
+            if (fileId < 0 || fileId >= MAX_FILE_NUM) {
+                cerr << "Invalid inputed arguments" << type << "\n";
+                DEBUG(dbgFile, "Invalid File ID\n");
+                kernel->machine->WriteRegister(2, -1);
+            }
+            else if (fileId == 0 || fileId == 1) {
+                printf("\nKhong the seek tren consoleIO");
+                kernel->machine->WriteRegister(2, -1);
+            }
+            else {
+                kernel->machine->WriteRegister(2, SysSeek(fileId, pos));
+            }
+            break;
+        }
 
         default:
-            cerr << "Unexpected system call " << type << "\n";
+            cerr
+                << "Unexpected system call "
+                << type
+                << "\n";
             break;
         }
         // Tăng giá trị PC

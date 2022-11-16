@@ -410,5 +410,10 @@ int FileSystem::GetFileDescriptorID(char *filename) {
     }
     return -1;
 }
+int OpenFile::Seek(int pos) {
+    Lseek(file, pos, 0);
+    currentOffset = Tell(file);
+    return currentOffset;
+}
 
 #endif // FILESYS_STUB

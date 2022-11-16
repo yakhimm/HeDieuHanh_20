@@ -653,4 +653,23 @@ int SysWrite(int bufferAddress, int lenBuffer, OpenFileId fileId) {
     return cntChar;
 }
 
+int SysSeek(int id, int pos) {
+    OpenFile *fileSpace = kernel->fileSystem->GetFileDescriptor(id);
+    if (fileSpace == NULL) {
+        printf("\nKhong the seek vi file nay khong ton tai.");
+        kernel->machine->WriteRegister(2, -1);
+        return -1;
+    }
+    if (pos == -1)
+        pos = fileSpace->Length();
+    if (pos > fileSpace->Length() || pos < 0) {
+        printf("\nKhong the seek file den vi tri nay.");
+        pos = -1;
+    }
+    else {
+        fileSpace->Seek(pos);
+    }
+    return pos;
+}
+
 #endif /* ! __USERPROG_KSYSCALL_H__ */
