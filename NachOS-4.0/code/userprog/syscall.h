@@ -152,6 +152,8 @@ int Remove(char *name);
 
 /* Open the Nachos file "name", and return an "OpenFileId" that can
  * be used to read and write to the file.
+ * type =0 for read and write
+ * type=1 for read only
  */
 OpenFileId Open(char *name);
 

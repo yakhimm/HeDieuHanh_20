@@ -330,6 +330,98 @@ void FileSystem::Print()
     delete dirHdr;
     delete freeMap;
     delete directory;
+<<<<<<< HEAD
 } 
+=======
+}
+
+#else
+FileSystem::FileSystem() {
+    openingFile = new OpenFile *[MAX_FILE_NUM];
+
+    for (int i = 0; i < MAX_FILE_NUM; i++) {
+        openingFile[i] = NULL;
+    }
+    this->Create("ConsoleInput");  // phần tử 0 -> ConsoleInput
+    this->Create("ConsoleOutput"); // phần tử 1 -> ConsoleOutput
+    openingFile[0] = this->Open("ConsoleInput", 0);
+    openingFile[1] = this->Open("ConsoleOutput", 0);
+}
+
+FileSystem::~FileSystem() {
+    for (int i = 0; i < MAX_FILE_NUM; i++) {
+        if (openingFile[i] != NULL)
+            openingFile[i] = NULL;
+    }
+    delete[] openingFile;
+}
+
+bool FileSystem::RemoveFileDescriptor(int index) {
+    if (openingFile[index] != NULL) {
+        // delete openingFile[index];
+        openingFile[index] = NULL;
+        return true;
+    }
+    return false;
+}
+
+OpenFile *FileSystem::AssignFileDescriptor(int index, char *filename, int fileType) {
+    if (openingFile[index] == NULL) {
+        openingFile[index] = Open(filename, fileType);
+        return openingFile[index];
+    }
+    return NULL;
+}
+
+int FileSystem::FileDescriptorFree() {
+    for (int i = 2; i < MAX_FILE_NUM; i++) {
+        if (openingFile[i] == NULL)
+            return i;
+    }
+    return -1;
+}
+
+OpenFile *
+FileSystem::Open(char *name, int fileType) {
+    int fileDescriptor = OpenForReadWrite(name, FALSE);
+
+    if (fileDescriptor == -1)
+        return NULL;
+    return new OpenFile(fileDescriptor, name, fileType);
+}
+
+OpenFile *FileSystem::GetFileDescriptor(int index) {
+    return openingFile[index];
+}
+
+OpenFile *FileSystem::GetFileDescriptor(char *filename) {
+    for (int i = 0; i < MAX_FILE_NUM; i++) {
+        if (openingFile[i] != NULL) {
+            char *openfileName = openingFile[i]->GetFileName();
+            if (openfileName != NULL && strcmp(openfileName, filename) == 0) {
+                return openingFile[i];
+            }
+        }
+    }
+    return NULL;
+}
+
+int FileSystem::GetFileDescriptorID(char *filename) {
+    for (int i = 0; i < MAX_FILE_NUM; i++) {
+        if (openingFile[i] != NULL) {
+            char *openfileName = openingFile[i]->GetFileName();
+            if (openfileName != NULL && strcmp(openfileName, filename) == 0) {
+                return i;
+            }
+        }
+    }
+    return -1;
+}
+int OpenFile::Seek(int pos) {
+    Lseek(file, pos, 0);
+    currentOffset = Tell(file);
+    return currentOffset;
+}
+>>>>>>> aeb9bea3beb13073a107fedfa1bd94d0d0b2400f
 
 #endif // FILESYS_STUB

@@ -112,7 +112,11 @@ ifeq ($(hosttype),unknown)
 PROGRAMS = unknownhost
 else
 # change this if you create a new test program!
+<<<<<<< HEAD
 PROGRAMS = add halt shell matmult sort sub createfile char bubblesort string num ascii help random clean
+=======
+PROGRAMS = add halt shell matmult sort sub createfile char bubblesort string num ascii help random  testFile
+>>>>>>> aeb9bea3beb13073a107fedfa1bd94d0d0b2400f
 endif
 
 all: $(PROGRAMS)
