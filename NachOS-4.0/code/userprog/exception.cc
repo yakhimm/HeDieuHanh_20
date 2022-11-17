@@ -300,12 +300,11 @@ void ExceptionHandler(ExceptionType which) {
             break;
         }
         case SC_Seek: {
-
             /*
-            int Seek(int position, OpenFileID id)
-            Input: position,id
-            Output: vị trí trong file
-            Used:
+                int Seek(int position, OpenFileID id)
+                Input: position,id
+                Output: vị trí trong file
+                Used:
             */
             int pos = kernel->machine->ReadRegister(4);
             int fileId = kernel->machine->ReadRegister(5);
