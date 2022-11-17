@@ -2,21 +2,6 @@
 
 char s[256];
 int main() {
-
-    // int res;
-    // res = Create("in.txt");
-    // PrintNum(res);
-    // Close(res);
-    // res = Open("in.txt", 0);
-    // PrintNum(res);
-    // Write("hello", 5, res);
-    // Close(res);
-    // res = Open("in.txt", 0);
-    // Read(s, 5, res);
-    // Close(res);
-    // PrintString(s);
-    // Halt();
-
     int id;
     id = Create("in.txt");
     Close(id);
