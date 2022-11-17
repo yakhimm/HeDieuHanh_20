@@ -11,7 +11,6 @@ int main() {
     int result;
     int id;
     int pos;
-    int i;
     PrintString("Nhap ten file nguon 1: ");
     ReadString(filename1,MAXLENGTH);
 
@@ -26,7 +25,7 @@ int main() {
         return 0;
     }
 
-    Read(s1,256,id);
+    Read(s1,MAXLENGTH,id);
     Close(id);
 
     id = Open(filename2, 1);
@@ -37,7 +36,7 @@ int main() {
         return 0;
     }
 
-    Read(s2,256,id);
+    Read(s2,MAXLENGTH,id);
     Close(id);
 
     PrintString("\n");
@@ -68,7 +67,7 @@ int main() {
     Close(id);
 
     id=Open("resultCon.txt",0);
-    pos=Read(s1,256,id);
+    pos=Read(s1,MAXLENGTH,id);
     Seek(pos,id);
     */
     
