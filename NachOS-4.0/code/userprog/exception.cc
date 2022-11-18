@@ -267,7 +267,7 @@ void ExceptionHandler(ExceptionType which) {
             int len = kernel->machine->ReadRegister(5);
             OpenFileId fileId = kernel->machine->ReadRegister(6);
 
-            if (len < 1 || fileId < 0 || fileId >= MAX_FILE_NUM) {
+            if (len < 0 || fileId < 0 || fileId >= MAX_FILE_NUM) {
                 cerr << "Invalid inputed arguments" << type << "\n";
                 DEBUG(dbgFile, "Invalid File ID\n");
             }
@@ -314,7 +314,7 @@ void ExceptionHandler(ExceptionType which) {
                 kernel->machine->WriteRegister(2, -1);
             }
             else if (fileId == 0 || fileId == 1) {
-                printf("\nKhong the seek tren consoleIO");
+                printf("\ncan not seek");
                 kernel->machine->WriteRegister(2, -1);
             }
             else {

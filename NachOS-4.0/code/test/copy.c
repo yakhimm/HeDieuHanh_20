@@ -1,11 +1,11 @@
 #include "syscall.h"
-#define maxlen 32
+#define maxlen 255
 char s[256];
 int main() {
-    int ids, idd, idd_c;
+    int src, dst;
     int len;
-    char* filenameSource;
-    char* filenameDestinate;
+    char filenameSource[256];
+    char filenameDestinate[256];
 
     PrintString("Nhap ten file nguon: ");
     ReadString(filenameSource, maxlen);
@@ -13,29 +13,32 @@ int main() {
     PrintString("Nhap ten file dich: ");
     ReadString(filenameDestinate, maxlen);
 
-    ids = Open(filenameSource, 1);
-    if (ids != -1) {
-        len = Seek(-1, ids);
-        Seek(0, ids);
-        Read(s, len, ids); 
+    src = Open(filenameSource, 1);
+    if (src != -1) {
+        len = Seek(-1, src);
+        Seek(0, src);
+        len = Read(s, len, src);
+        Close(src);
+        PrintString("\nSo ki tu da doc duoc: ");
+        PrintNum(len);
 
-        idd = Open(filenameSource, 0);
-        if (idd == -1) {
+        dst = Open(filenameDestinate, 0);
+        if (dst == -1) {
             if (Create(filenameDestinate) == -1) {
-                PrintString("< ERROR > Khong the tao file dich !! Chuong trinh huy bo !!");
-                Close(ids);
+                PrintString("\n< ERROR > Khong the tao file dich !! Chuong trinh huy bo !!");
                 Halt();
-            }   
-            else
-                PrintString("Tao file dich thanh cong !!");
-        }   
-        Write(s, len, idd);
-        PrintString("Copy du lieu thanh cong !!");
-        Close(idd);  
+            }
+            else {
+                PrintString("\nTao file dich thanh cong !!");
+                dst = Open(filenameDestinate, 0);
+            }
+        }
+        Write(s, len, dst);
+        PrintString("\nCopy du lieu thanh cong !!");
+        Close(dst);
     }
-    else 
-        PrintString("< ERROR > File nguon khong ton tai !!");
-    Close(ids);
+    else
+        PrintString("\n< ERROR > File nguon khong ton tai !!");
 
     Halt();
 }

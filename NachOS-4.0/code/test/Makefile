@@ -112,7 +112,7 @@ ifeq ($(hosttype),unknown)
 PROGRAMS = unknownhost
 else
 # change this if you create a new test program!
-PROGRAMS = halt char bubblesort string num ascii help random createfile cat delete concatenate
+PROGRAMS = halt char bubblesort string num ascii help random createfile cat copy delete concatenate
 endif
 
 all: $(PROGRAMS)

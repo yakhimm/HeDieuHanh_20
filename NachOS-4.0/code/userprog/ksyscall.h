@@ -121,8 +121,10 @@ void SysReadString(int length) {
     // Tạo chuỗi ký tự buffer
     char *buffer = new char[length + 1];
     // Nếu buffer == NULL thì kết thúc (Do không đủ vùng nhớ để tạo)
-    if (!buffer)
+    if (!buffer) {
+        printf("\n NULL pointer");
         return;
+    }
 
     // Vị trí i (index) của từng ký tự
     int i = 0;
@@ -131,10 +133,7 @@ void SysReadString(int length) {
 
     // Dùng vòng lặp để đọc chuỗi ký tự nhập vào
     while (i < length) {
-        do {
-            // Nhận ký tự từ system
-            ch = kernel->synchConsoleIn->GetChar();
-        } while (ch == EOF);
+        ch = kernel->synchConsoleIn->GetChar();
         // Khi nhập: Enter -> ket thuc nhap
         if (ch == '\0' || ch == '\n') {
             buffer[i] = '\0';
@@ -453,7 +452,7 @@ void SysOpen() {
     char *filename;
     // Copy file name vào system space
     // Độ dài tối đa của filename: 32 bytes
-    filename = User2System(filenameAddr, FILENAME_MAXLEN + 1);
+    filename = User2System(filenameAddr, MAXLENGTH + 1);
 
     if (filename == NULL || strlen(filename) < 1) {
         kernel->machine->WriteRegister(2, -1);
@@ -541,16 +540,16 @@ int SysRead(int bufferAddress, int lenBuffer, OpenFileId fileId) {
             return -1;
         for (i = 0; i < lenBuffer; ++i) {
             ch = kernel->synchConsoleIn->GetChar();
-            if (ch == 0) {
-                buffer[i] = 0;
+            if (ch == '\0' || ch == '\n') {
+                buffer[i] = '\0';
                 break;
             }
             buffer[i] = ch;
         }
 
-        if (i == lenBuffer) {
-            buffer[i] = 0; // EOF
-        }
+        // if (i == lenBuffer) {
+        //     buffer[i] = 0; // EOF
+        // }
         System2User(bufferAddress, buffer, i);
 
         // kiểm soát trường hợp tràn buffer;
@@ -583,6 +582,7 @@ int SysRead(int bufferAddress, int lenBuffer, OpenFileId fileId) {
         //đọc nội dung file vào buffer và lưu số byte đọc được vào cntChar
 
         cntChar = kernel->fileSystem->GetFileDescriptor(fileId)->Read(buffer, lenBuffer);
+        // printf("so ki tu doc duoc la %d\n", cntChar);
         if (cntChar > 0) {
             buffer[cntChar] = 0;
             System2User(bufferAddress, buffer, cntChar);
@@ -590,7 +590,7 @@ int SysRead(int bufferAddress, int lenBuffer, OpenFileId fileId) {
 
         else {
             DEBUG(dbgFile, "File empty\n");
-            printf("\nread error");
+            printf("\nFile empty");
         }
         delete[] buffer;
         break;
@@ -617,7 +617,7 @@ int SysWrite(int bufferAddress, int lenBuffer, OpenFileId fileId) {
         int i = 0;
 
         if (!buffer) {
-            DEBUG(dbgAddr, "Cap phat khong thanh cong\n");
+            DEBUG(dbgAddr, "allocate failed\n");
             SysHalt();
             return -1;
         }
@@ -656,14 +656,14 @@ int SysWrite(int bufferAddress, int lenBuffer, OpenFileId fileId) {
 int SysSeek(int id, int pos) {
     OpenFile *fileSpace = kernel->fileSystem->GetFileDescriptor(id);
     if (fileSpace == NULL) {
-        printf("\nKhong the seek vi file nay khong ton tai.");
+        printf("\this file is not exist");
         kernel->machine->WriteRegister(2, -1);
         return -1;
     }
     if (pos == -1)
         pos = fileSpace->Length();
     if (pos > fileSpace->Length() || pos < 0) {
-        printf("\nKhong the seek file den vi tri nay.");
+        printf("\ncan not seek");
         pos = -1;
     }
     else {
