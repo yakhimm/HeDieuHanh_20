@@ -112,7 +112,7 @@ ifeq ($(hosttype),unknown)
 PROGRAMS = unknownhost
 else
 # change this if you create a new test program!
-PROGRAMS = halt char bubblesort string num ascii help random testFile createfile cat delete concatenate
+PROGRAMS = halt char bubblesort string num ascii help random createfile cat delete concatenate
 endif
 
 all: $(PROGRAMS)
@@ -209,12 +209,6 @@ random.o: random.c
 random: random.o start.o
 	$(LD) $(LDFLAGS) start.o random.o -o random.coff
 	$(COFF2NOFF) random.coff random
-
-testFile.o: testFile.c
-	$(CC) $(CFLAGS) -c testFile.c
-testFile: testFile.o start.o
-	$(LD) $(LDFLAGS) start.o testFile.o -o testFile.coff
-	$(COFF2NOFF) testFile.coff testFile
 
 cat.o: cat.c
 	$(CC) $(CFLAGS) -c cat.c
