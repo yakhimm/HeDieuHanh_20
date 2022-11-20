@@ -389,25 +389,21 @@ void SysPrintNum() {
 }
 
 void SysCreate() {
-
     int result;
     char *filename;
     int filenameAddr = kernel->machine->ReadRegister(4);
 
     filename = User2System(filenameAddr, FILENAME_MAX + 1);
-
+    
+    // Kiểm tra filename
     if (strlen(filename) == 0 || filename == NULL) {
         printf("\nFile name is not default");
         DEBUG(dbgSys, "\nFile name is not default");
         result = -1;
     }
-    else
-        // Tạo file rỗng
-
-        if (kernel->fileSystem->Create(filename) == true) {
-            // printf("\nhere1");
-            // printf("\nCreating file '%s' successful !!", filename);
-            // printf("\nhere2");
+    else if (kernel->fileSystem->Create(filename) == true) {
+            // Tạo file rỗng thành công
+            printf("\nCreating file '%s' successful !!", filename);
             result = 0;
         }
         else {
@@ -415,7 +411,6 @@ void SysCreate() {
             result = -1;
         }
 
-    // Write thì cần lệnh read num
     kernel->machine->WriteRegister(2, result);
     delete[] filename;
 }
@@ -425,6 +420,7 @@ void SysRemove() {
     int ptr = kernel->machine->ReadRegister(4);
     char *filename = User2System(ptr, MAXLENGTH);
 
+    // Kiểm tra filename
     if (filename == NULL || strlen(filename) < 1) {
         kernel->machine->WriteRegister(2, -1);
         if (filename)
@@ -432,13 +428,16 @@ void SysRemove() {
         return;
     }
 
+    // Kiểm tra xem file có đang mở không
     OpenFile *is_opening = kernel->fileSystem->GetFileDescriptor(filename);
     if (is_opening != NULL) {
+        // Nếu có thì không thể xóa file
         printf("File is opening !! Close file to remove");
         DEBUG(dbgSys, "File is opening !! Close file to remove !!");
         kernel->machine->WriteRegister(2, 0);
     }
     else {
+        // Xóa file
         result = kernel->fileSystem->Remove(filename);
         kernel->machine->WriteRegister(2, result);
     }
@@ -453,7 +452,6 @@ void SysOpen() {
     // Copy file name vào system space
     // Độ dài tối đa của filename: 32 bytes
     filename = User2System(filenameAddr, MAXLENGTH + 1);
-
     if (filename == NULL || strlen(filename) < 1) {
         kernel->machine->WriteRegister(2, -1);
         if (filename)
@@ -462,7 +460,6 @@ void SysOpen() {
     }
 
     int openfile = kernel->fileSystem->GetFileDescriptorID(filename);
-
     if (openfile != -1) {
         kernel->machine->WriteRegister(2, openfile);
         delete[] filename;
@@ -470,7 +467,6 @@ void SysOpen() {
     }
 
     int fileIDfree = kernel->fileSystem->FileDescriptorFree();
-    // printf("%d here\n", openfile);
     if (fileIDfree == -1) {
         kernel->machine->WriteRegister(2, -1);
         delete[] filename;
@@ -502,7 +498,7 @@ void SysOpen() {
         break;
     }
     default: {
-        // filetype không hợp lệ
+        // Filetype không hợp lệ
         kernel->machine->WriteRegister(2, -1);
         break;
     }
@@ -526,13 +522,13 @@ void SysClose() {
 }
 
 int SysRead(int bufferAddress, int lenBuffer, OpenFileId fileId) {
-    // lưu kết quả trả về
+    // Lưu kết quả trả về 
     int cntChar = -1;
-    // xét những trường hợp fileID đặc biệt Console IO
+    // Xét những trường hợp fileID đặc biệt Console IO
     switch (fileId) {
     // consoleIN
     case 0: {
-        // làm tương tự như read string, đọc từng kí tự từ console cho đến khi gặp EOF
+        // Làm tương tự như SC_ReadString: Đọc từng kí tự từ console cho đến khi gặp EOF
         char *buffer = new char[lenBuffer + 1];
         char ch;
         int i;
@@ -546,13 +542,8 @@ int SysRead(int bufferAddress, int lenBuffer, OpenFileId fileId) {
             }
             buffer[i] = ch;
         }
-
-        // if (i == lenBuffer) {
-        //     buffer[i] = 0; // EOF
-        // }
         System2User(bufferAddress, buffer, i);
-
-        // kiểm soát trường hợp tràn buffer;
+        // Kiểm soát trường hợp tràn buffer;
         if (ch != '\0' && ch != '\n') {
             while (true) {
                 ch = kernel->synchConsoleIn->GetChar();
@@ -560,9 +551,7 @@ int SysRead(int bufferAddress, int lenBuffer, OpenFileId fileId) {
                     break;
             }
         }
-
-        // trả về số byte/kí tự thực sự đọc được
-        // kernel->machine->WriteRegister(4, i);
+        // Trả về số byte (kí tự thực sự đọc được)
         cntChar = i;
         delete[] buffer;
         break;
@@ -574,20 +563,13 @@ int SysRead(int bufferAddress, int lenBuffer, OpenFileId fileId) {
     }
     default: {
         char *buffer = new char[lenBuffer + 1];
-        // lấy con trỏ vùng nhớ của file cần đọc
-
-        // if (!file2read)
-        //     printf("\ngo her\n");
-
-        //đọc nội dung file vào buffer và lưu số byte đọc được vào cntChar
-
+        // Lấy con trỏ vùng nhớ của file cần đọc
+        // Đọc nội dung file vào buffer và lưu số byte đọc được vào cntChar
         cntChar = kernel->fileSystem->GetFileDescriptor(fileId)->Read(buffer, lenBuffer);
-        // printf("so ki tu doc duoc la %d\n", cntChar);
         if (cntChar > 0) {
             buffer[cntChar] = 0;
             System2User(bufferAddress, buffer, cntChar);
         }
-
         else {
             DEBUG(dbgFile, "File empty\n");
             printf("\nFile empty");
@@ -606,18 +588,17 @@ int SysWrite(int bufferAddress, int lenBuffer, OpenFileId fileId) {
     switch (fileId) {
     // consoleIN
     case 0: {
-        DEBUG(dbgFile, "stdout can't be written!\n");
+        DEBUG(dbgFile, "<ERROR> stdout can't be written !!\n");
         break;
     }
-        // consoleOUT
-
+    // consoleOUT
     case 1: {
         // tương tự như print string
         char *buffer = User2System(bufferAddress, lenBuffer);
         int i = 0;
 
         if (!buffer) {
-            DEBUG(dbgAddr, "allocate failed\n");
+            DEBUG(dbgAddr, "<ERROR> Allocate failed !!\n");
             SysHalt();
             return -1;
         }
@@ -635,12 +616,12 @@ int SysWrite(int bufferAddress, int lenBuffer, OpenFileId fileId) {
         char *buffer = User2System(bufferAddress, lenBuffer);
         OpenFile *file2write = kernel->fileSystem->GetFileDescriptor(fileId);
         if (!buffer) {
-            DEBUG(dbgAddr, "Cap phat khong thanh cong\n");
+            DEBUG(dbgAddr, "<ERROR> Cap phat khong thanh cong !!\n");
             SysHalt();
             return -1;
         }
         if (file2write->GetFileType() != 0) {
-            DEBUG(dbgFile, "Read-only files can't be written\n");
+            DEBUG(dbgFile, "<ERROR> Read-only files can't be written !!\n");
         }
         else {
         }
@@ -656,14 +637,14 @@ int SysWrite(int bufferAddress, int lenBuffer, OpenFileId fileId) {
 int SysSeek(int id, int pos) {
     OpenFile *fileSpace = kernel->fileSystem->GetFileDescriptor(id);
     if (fileSpace == NULL) {
-        printf("\this file is not exist");
+        printf("\n<ERROR> This file is not exist !!");
         kernel->machine->WriteRegister(2, -1);
         return -1;
     }
     if (pos == -1)
         pos = fileSpace->Length();
     if (pos > fileSpace->Length() || pos < 0) {
-        printf("\ncan not seek");
+        printf("\n<ERROR> Can not seek !!");
         pos = -1;
     }
     else {

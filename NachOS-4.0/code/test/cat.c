@@ -17,7 +17,6 @@ int main() {
         id = Open(filename, 0);
         Seek(0, id);
         Close(id);
-        // PrintNum(id);
         id = Open(filename, 0);
         Read(s, len, id);
         Close(id);

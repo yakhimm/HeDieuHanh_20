@@ -6,7 +6,7 @@ char filename2[256];
 char s1[256];
 char s2[256];
 
-//Kết quả nối của 2 file sẽ được thể hiện ở file resultCon.txt
+// Kết quả nối của 2 file sẽ được thể hiện ở file resultCon.txt
 int main() {
     int result;
     int id;
@@ -18,9 +18,9 @@ int main() {
     ReadString(filename2,MAXLENGTH);
   
     id = Open(filename1, 1);
-    if (id==-1)
+    if (id == -1)
     {
-        PrintString("\nMo file nguon 1 that bai!");
+        PrintString("\n<ERROR> Mo file nguon 1 that bai !!");
         Halt();
         return 0;
     }
@@ -31,19 +31,18 @@ int main() {
     id = Open(filename2, 1);
     if (id==-1)
     {
-        PrintString("\nMo file nguon 2 that bai!");
+        PrintString("\n<ERROR> Mo file nguon 2 that bai !!");
         Halt();
         return 0;
     }
 
     Read(s2,MAXLENGTH,id);
     Close(id);
-
     PrintString("\n");
 
-    //tạo file lưu kết quả
-    id=Open("resultCon.txt",0);
-    if (id!=-1)
+    // Tạo file lưu kết quả
+    id = Open("resultCon.txt", 0);
+    if (id != -1)
     {
         Close(id);
         Remove("resultCon.txt");
@@ -51,41 +50,32 @@ int main() {
     id = Create("resultCon.txt");
     Close(id);
     if (id == -1) {
-        PrintString("\nTao file that bai\n");
+        PrintString("\n<ERROR> Tao file that bai !!\n");
         Halt();
         return 0;
     }
-    id=Open("resultCon.txt",0);
-    //Xác định kích thước
-    pos=0;
+
+    id = Open("resultCon.txt", 0);
+    // Xác định kích thước
+    pos = 0;
     while(s1[pos] != '\0') {
         pos++;
     }
-    Write(s1,pos,id);
-
-    /* thêm đoạn này là có Seek
-    Close(id);
-
-    id=Open("resultCon.txt",0);
-    pos=Read(s1,MAXLENGTH,id);
-    Seek(pos,id);
-    */
-    
-
-    //Xác định kích thước
-    pos=0;
+    Write(s1, pos, id);  
+    // Xác định kích thước
+    pos = 0;
     while(s2[pos] != '\0') {
         pos++;
     }
-    Write(s2,pos,id);
+    Write(s2, pos, id);
 
-    if (Close(id)==0)
+    if (Close(id) == 0)
     {
         PrintString("\nNoi file thanh cong");
     }
     else
     {
-        PrintString("\nNoi file khong thanh cong");
+        PrintString("\n<ERROR> Noi file khong thanh cong !!");
     }
 
     Halt();

@@ -281,8 +281,8 @@ void ExceptionHandler(ExceptionType which) {
             /*
             int Write(char *buffer, int size, OpenFileID id)
                 Input: buffer,size, id
-                Output: số lượng kí tự ghi thành công
-                Used: ghi các kí tự trong buffer vào file
+                Output: Số lượng kí tự ghi thành công
+                Used: Ghi các kí tự trong buffer vào file
             */
             int bufferAddress = kernel->machine->ReadRegister(4);
             int len = kernel->machine->ReadRegister(5);
@@ -301,10 +301,10 @@ void ExceptionHandler(ExceptionType which) {
         }
         case SC_Seek: {
             /*
-                int Seek(int position, OpenFileID id)
-                Input: position,id
-                Output: vị trí trong file
-                Used:
+            int Seek(int position, OpenFileID id)
+                Input: position, id
+                Output: Vị trí trong file
+                Used: Đặt con trỏ file tại vị trí position
             */
             int pos = kernel->machine->ReadRegister(4);
             int fileId = kernel->machine->ReadRegister(5);
@@ -322,7 +322,6 @@ void ExceptionHandler(ExceptionType which) {
             }
             break;
         }
-
         default:
             cerr
                 << "Unexpected system call "
