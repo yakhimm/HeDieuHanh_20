@@ -9,7 +9,7 @@ int main() {
 
     PrintString("Nhap ten file ban muon doc: ");
     ReadString(filename, maxlen);
-    PrintString(filename);
+    
     id = Open(filename, 1);
     if (id != -1) {
         len = Seek(-1, id);

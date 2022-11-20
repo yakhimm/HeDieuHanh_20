@@ -14,7 +14,7 @@ int main() {
     PrintString("Nhap ten file nguon 1: ");
     ReadString(filename1,MAXLENGTH);
 
-    PrintString("\nNhap ten file nguon 2: ");
+    PrintString("Nhap ten file nguon 2: ");
     ReadString(filename2,MAXLENGTH);
   
     id = Open(filename1, 1);
@@ -38,8 +38,7 @@ int main() {
 
     Read(s2,MAXLENGTH,id);
     Close(id);
-    PrintString("\n");
-
+    
     // Tạo file lưu kết quả
     id = Open("resultCon.txt", 0);
     if (id != -1)
@@ -71,7 +70,7 @@ int main() {
 
     if (Close(id) == 0)
     {
-        PrintString("\nNoi file thanh cong");
+        PrintString("\nNoi file thanh cong\n");
     }
     else
     {
